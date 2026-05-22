@@ -30,11 +30,22 @@
 <body>
     <div class="video-grid">
         <div class="cam-card"><div class="cam-label">แยกกรมหลวง</div><video id="v1" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">แยกซอยจินตคาม</div><video id="v1" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">แยกปั้ม ปตท. ไฮเทค</div><video id="v1" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">แยกกองบิน (2)</div><video id="v1" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">แยกกองบิน (1)</div><video id="v1" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">มทบ.24 (1)</div><video id="v1" class="video-player" autoplay muted playsinline controls></video></div>
         <div class="cam-card"><div class="cam-label">แยกร่วมทวี</div><video id="v2" class="video-player" autoplay muted playsinline controls></video></div>
         <div class="cam-card"><div class="cam-label">แยกเซ็นทรัล</div><video id="v3" class="video-player" autoplay muted playsinline controls></video></div>
+        
         <div class="cam-card"><div class="cam-label">แยกสถานีรถไฟ</div><video id="v4" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">แยกเรือนจำ</div><video id="v4" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">แยกสนามกีฬาเวสุวรรณ</div><video id="v4" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">จุดกลับรถหน้าตลาดเมืองทอง</div><video id="v4" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">แยกชลประทาน</div><video id="v4" class="video-player" autoplay muted playsinline controls></video></div>
+        <div class="cam-card"><div class="cam-label">แยกหน้าโรงเรียนอุดรคริสเตียน</div><video id="v4" class="video-player" autoplay muted playsinline controls></video></div>
     </div>
-
+https://streaming.udoncity.go.th:1935/live/cctv_t191149.stream/chunklist_w1308396059.m3u8
     <script>
         function initPlayer(id, src) {
             const video = document.getElementById(id);
@@ -46,9 +57,19 @@
         }
         window.onload = () => {
             initPlayer('v1', 'https://streaming.udoncity.go.th:1935/live/cctv_121.stream/chunklist_w2010918290.m3u8');
-            initPlayer('v2', 'https://streaming.udoncity.go.th:1935/live/Axis_12_22.stream/chunklist_w236554495.m3u8');
-            initPlayer('v3', 'https://streaming.udoncity.go.th:1935/live/Axis_12_38.stream/chunklist_w1610502304.m3u8');
-            initPlayer('v4', 'https://streaming.udoncity.go.th:1935/live/Axis_12_33.stream/chunklist_w34733218.m3u8');
+            initPlayer('v2', 'https://streaming.udoncity.go.th:1935/live/cctv_a740.stream/chunklist_w2046126640.m3u8');
+            initPlayer('v3', 'https://streaming.udoncity.go.th:1935/live/cctv_t191146.stream/chunklist_w1181163501.m3u8');
+            initPlayer('v4', 'https://streaming.udoncity.go.th:1935/live/cctv_t191149.stream/chunklist_w1308396059.m3u8');
+            initPlayer('v5', 'https://streaming.udoncity.go.th:1935/live/cctv_t191150.stream/chunklist_w1176991256.m3u8');
+            initPlayer('v6', 'https://streaming.udoncity.go.th:1935/live/cctv_t191151.stream/chunklist_w1926802290.m3u8');
+            initPlayer('v7', 'https://streaming.udoncity.go.th:1935/live/Axis_12_22.stream/chunklist_w236554495.m3u8');
+            initPlayer('v8', 'https://streaming.udoncity.go.th:1935/live/Axis_12_38.stream/chunklist_w1610502304.m3u8');
+            initPlayer('v9', 'https://streaming.udoncity.go.th:1935/live/Axis_12_33.stream/chunklist_w34733218.m3u8');
+            initPlayer('v10', 'https://streaming.udoncity.go.th:1935/live/Axis_IP729.stream/chunklist_w1495648512.m3u8');
+            initPlayer('v11', 'https://streaming.udoncity.go.th:1935/live/Bosch_IP2.30.stream/chunklist_w828303139.m3u8');
+            initPlayer('v12', 'https://streaming.udoncity.go.th:1935/live/Axis_12_30.stream/chunklist_w467067745.m3u8');
+            initPlayer('v13', 'https://streaming.udoncity.go.th:1935/live/Axis_12_45.stream/chunklist_w787893003.m3u8');
+            initPlayer('v14', 'https://streaming.udoncity.go.th:1935/live/Axis_12_53.stream/chunklist_w686882157.m3u8');
         };
     </script>
     <script>
