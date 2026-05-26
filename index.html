@@ -956,16 +956,16 @@
 
         // ==========================================
         //  OBFUSCATED CONFIGURATION
-         // ==========================================
-         const _fbc = "eyJhcGlLZXkiOiAiQUl6YVN5RHVLUW5nVWQ0NThCOEFtNF9BancyR25XQmlUbnYxMm44IiwgImF1dGhEb21haW4iOiAiY291Z2FyMi03OTM1NC5maXJlYmFzZWFwcC5jb20iLCAiZGF0YWJhc2VVUkwiOiAiaHR0cHM6Ly9jb3VnYXIyLTc5MzU0LWRlZmF1bHQtcnRkYi5hc2lhLXNvdXRoZWFzdDEuZmlyZWJhc2VkYXRhYmFzZS5hcHAiLCAicHJvamVjdElkIjogImNvdWdhcjItNzkzNTQiLCAic3RvcmFnZUJ1Y2tldCI6ICJjb3VnYXIyLTc5MzU0LmZpcmViYXNlc3RvcmFnZS5hcHAiLCAibWVzc2FnaW5nU2VuZGVySWQiOiAiODA3MDk5Njk1MzU3IiwgImFwcElkIjogIjE6ODA3MDk5Njk1MzU3OndlYjpiODY1MTQ1ODI2OWZjYzUxYzA3ZTk0IiwgIm1lYXN1cmVtZW50SWQiOiAiRy01MjhQQkJGQkU0In0=";
-         const firebaseConfig = JSON.parse(_d(_fbc));
+        // ==========================================
+        const _fbc = "eyJhcGlLZXkiOiJBSXphU3lEdUtRbmdVZDQ1OEI4QW00X0FqdzJHbldCaVRudjEybjgiLCJhdXRoRG9tYWluIjoiY291Z2FyMi03OTM1NC5maXJlYmFzZWFwcC5jb20iLCJkYXRhYmFzZVVSTCI6Imh0dHBzOi8vY291Z2FyMi03OTM1NC1kZWZhdWx0LXJ0ZGIuYXNpYS1zb3V0aGVhc3QxLmZpcmViYXNlZGF0YWJhc2UuYXBwIiwicHJvamVjdElkIjoiY291Z2FyMi03OTM1NCIsInN0b3JhZ2VCdWNrZXQiOiJjb3VnYXIyLTc5MzU0LmZpcmViYXNlc3RvcmFnZS5hcHAiLCJtZXNzYWdpbmdTZW5kZXJJZCI6IjgwNzA5OTY5NTM1NyIsImFwcElkIjoiMTo4MDcwOTk2OTUzNTc6d2ViOmI4NjUxNDU4MjY5ZmNjNTFjMDdlOTQiLCJtZWFzdXJlZW50SWQiOiJHLTUyOFBCQkZCRTQifQ==";
+        const firebaseConfig = JSON.parse(_d(_fbc));
         
-        // ตรวจสอบว่ามีการตั้งค่า Firebase หรือยัง
-        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+        // Initialize Firebase
+        if (!firebase.apps.length && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
             firebase.initializeApp(firebaseConfig);
         }
 
-        const telegramBotToken = _d("NzcxMzM1Mjg3NDpBQUVmRHlkYzNPSEstNVZTMm9SQ1V1MnBtdEt5VlpJSkNuRQ==");
+        const telegramBotToken = _d("NzcxMzM1Mjg3NDpBQUVmRHlkYzNPSEstNVZTMG9SQ1V1MnBtdEt5VlpJSkNuRQ==");
         const telegramChatId = _d("LTUxMjQyNzc4MzU=");
 
         var currentUser = null;
@@ -1178,6 +1178,12 @@
         }
 
         async function loginWithGoogle() {
+            // ตรวจสอบว่ารันผ่าน file:// หรือไม่ (Firebase Auth ไม่รองรับ)
+            if (window.location.protocol === 'file:') {
+                alert("⚠️ ไม่สามารถเข้าสู่ระบบผ่านไฟล์โดยตรงได้\n\nFirebase Authentication ต้องการการรันผ่านเซิร์ฟเวอร์ (http:// หรือ https://) เท่านั้น\n\nวิธีแก้ไข:\n1. ใช้ส่วนขยาย 'Live Server' ใน VS Code\n2. หรืออัปโหลดไฟล์ขึ้นโฮสติ้ง (เช่น Vercel, Netlify)");
+                return;
+            }
+
             if (firebaseConfig.apiKey === "YOUR_API_KEY" || firebaseConfig.apiKey === "") {
                 alert("กรุณาตั้งค่า Firebase Config ในโค้ดก่อนใช้งานระบบ Login ครับ");
                 // จำลองการ Login เพื่อให้เห็น UI (สำหรับ Demo)
