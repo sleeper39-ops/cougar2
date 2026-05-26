@@ -752,6 +752,10 @@
                 <div class="md:col-span-2">
                     <label class="block text-xs text-gray-400 mb-1.5 font-semibold">อัปโหลดไฟล์เดโมระบบใหม่ (.html เท่านั้น)</label>
                     <input type="file" id="edit-sys-demo-file" accept=".html" class="w-full px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
+                    <div class="flex items-center gap-2 mt-2">
+                        <input type="checkbox" id="edit-sys-clear-demo" class="w-4 h-4 rounded border-white/10 bg-gray-950 text-indigo-600 focus:ring-indigo-500">
+                        <label for="edit-sys-clear-demo" class="text-[10px] text-amber-400 font-semibold cursor-pointer">ลบไฟล์เดโมเดิมทิ้ง (เพื่อใช้ Demo URL/Link แทน)</label>
+                    </div>
                     <p class="text-[9px] text-amber-400/80 mt-1.5 leading-relaxed">
                         <i class="fa-solid fa-triangle-exclamation mr-1"></i> <b>ข้อแนะนำ:</b> ไฟล์ HTML ต้องรวม CSS/JS ไว้ในไฟล์เดียว (Inline) หรือใช้ลิงก์แบบ CDN เท่านั้น ไม่สามารถดึงไฟล์ .js หรือ .css แยกต่างหากในโฟลเดอร์ได้
                     </p>
@@ -1652,7 +1656,11 @@
                 
                 renderAdminSystemsTable();
                 renderCatalog();
-                syncSystemsToFirebase(); // บันทึกข้อมูลลง Firebase
+                
+                // ลบข้อมูลออกจาก Firebase (มีประสิทธิภาพกว่า)
+                if (firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.apiKey !== "") {
+                    firebase.database().ref('systems/' + id).remove();
+                }
             }
         }
 
@@ -1666,6 +1674,7 @@
                 document.getElementById('edit-sys-downloads').value = sys.downloads || 0;
                 document.getElementById('edit-sys-images').value = ""; // Clear multi image input
                 document.getElementById('edit-sys-demo-file').value = ""; // Clear demo file input
+                document.getElementById('edit-sys-clear-demo').checked = false; // Reset clear demo checkbox
                 document.getElementById('edit-sys-desc').value = sys.desc;
                 document.getElementById('edit-sys-demo').value = sys.demo;
                 document.getElementById('edit-sys-source').value = sys.source;
@@ -1686,42 +1695,63 @@
 
         async function updateSystemData() {
             var id = document.getElementById('edit-sys-id').value;
+            
+            // 1. อ่านข้อมูลไฟล์ใหม่ก่อน (ถ้ามี)
+            var fileInput = document.getElementById('edit-sys-images');
+            var demoFileInput = document.getElementById('edit-sys-demo-file');
+            
+            var newImageUrls = null;
+            var newDemoHtmlContent = null;
+
+            if (fileInput.files && fileInput.files.length > 0) {
+                newImageUrls = [];
+                const count = Math.min(fileInput.files.length, 4);
+                for (let i = 0; i < count; i++) {
+                    newImageUrls.push(await readFileAsDataURL(fileInput.files[i]));
+                }
+            }
+            
+            if (demoFileInput.files && demoFileInput.files[0]) {
+                newDemoHtmlContent = await readFileAsText(demoFileInput.files[0]);
+            }
+
+            // 2. ค้นหาข้อมูลระบบใน database อีกครั้งหลังจาก await เพื่อป้องกัน race condition
             var sysIndex = systemsDatabase.findIndex(s => s.id === id);
             
             if (sysIndex !== -1) {
-                var fileInput = document.getElementById('edit-sys-images');
-                var demoFileInput = document.getElementById('edit-sys-demo-file');
-                var imageUrls = systemsDatabase[sysIndex].images || [systemsDatabase[sysIndex].image]; 
-                var demoHtmlContent = systemsDatabase[sysIndex].demoHtml || "";
-
-                if (fileInput.files && fileInput.files.length > 0) {
-                    imageUrls = [];
-                    const count = Math.min(fileInput.files.length, 4);
-                    for (let i = 0; i < count; i++) {
-                        imageUrls.push(await readFileAsDataURL(fileInput.files[i]));
-                    }
+                // อัปเดตรูปภาพ (ถ้ามีการเลือกใหม่)
+                if (newImageUrls) {
+                    systemsDatabase[sysIndex].image = newImageUrls[0];
+                    systemsDatabase[sysIndex].images = newImageUrls;
                 }
                 
-                if (demoFileInput.files && demoFileInput.files[0]) {
-                    demoHtmlContent = await readFileAsText(demoFileInput.files[0]);
+                // อัปเดตไฟล์เดโม (ถ้ามีการเลือกใหม่ หรือต้องการลบของเก่า)
+                if (newDemoHtmlContent !== null) {
+                    systemsDatabase[sysIndex].demoHtml = newDemoHtmlContent;
+                } else if (document.getElementById('edit-sys-clear-demo').checked) {
+                    systemsDatabase[sysIndex].demoHtml = ""; // ล้างข้อมูล HTML เพื่อให้ไปใช้ Demo URL แทน
                 }
 
+                // อัปเดตข้อมูลส่วนอื่นๆ
                 systemsDatabase[sysIndex].title = document.getElementById('edit-sys-title').value.trim();
                 systemsDatabase[sysIndex].tier = document.getElementById('edit-sys-tier').value;
                 systemsDatabase[sysIndex].price = parseInt(document.getElementById('edit-sys-price').value) || 1;
                 systemsDatabase[sysIndex].downloads = parseInt(document.getElementById('edit-sys-downloads').value) || 0;
-                systemsDatabase[sysIndex].image = imageUrls[0];
-                systemsDatabase[sysIndex].images = imageUrls;
-                systemsDatabase[sysIndex].demoHtml = demoHtmlContent;
                 systemsDatabase[sysIndex].desc = document.getElementById('edit-sys-desc').value.trim();
                 systemsDatabase[sysIndex].demo = document.getElementById('edit-sys-demo').value.trim();
                 systemsDatabase[sysIndex].source = document.getElementById('edit-sys-source').value.trim();
                 
-                alert('อัปเดตข้อมูลระบบเรียบร้อยแล้ว!');
+                // บันทึกเฉพาะรายการที่แก้ไขลง Firebase (มีประสิทธิภาพกว่า)
+                if (firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.apiKey !== "") {
+                    firebase.database().ref('systems/' + id).set(systemsDatabase[sysIndex]);
+                }
+                
+                alert('อัปเดตข้อมูลระบบ "' + systemsDatabase[sysIndex].title + '" เรียบร้อยแล้ว!');
                 closeModal('edit-system-modal');
                 renderAdminSystemsTable();
                 renderCatalog();
-                syncSystemsToFirebase(); // บันทึกข้อมูลลง Firebase
+            } else {
+                alert('ไม่พบข้อมูลระบบที่ต้องการแก้ไข (อาจมีการรีโหลดข้อมูลใหม่)');
             }
         }
 
@@ -1950,7 +1980,11 @@
             systemsDatabase.unshift(newSys);
             currentPage = 1; // กลับไปหน้าแรกเพื่อดูระบบที่เพิ่มใหม่
             renderCatalog();
-            syncSystemsToFirebase(); // บันทึกข้อมูลลง Firebase
+            
+            // บันทึกเฉพาะระบบใหม่ลง Firebase (มีประสิทธิภาพกว่า)
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.apiKey !== "") {
+                firebase.database().ref('systems/' + newSys.id).set(newSys);
+            }
 
             // Clear inputs
             document.getElementById('add-sys-title').value = "";
