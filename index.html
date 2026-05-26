@@ -1283,6 +1283,11 @@
             try {
                 await firebase.auth().signInWithPopup(provider);
             } catch (error) {
+                // ซ่อน Error หากผู้ใช้กดปิดหน้าต่าง Login เอง
+                if (error.code === 'auth/popup-closed-by-user') {
+                    console.log("User closed the login popup.");
+                    return;
+                }
                 console.error("Login Error:", error);
                 alert("เกิดข้อผิดพลาดในการเข้าสู่ระบบ: " + error.message);
             }
