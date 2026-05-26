@@ -544,10 +544,17 @@
                                 <input type="text" id="add-sys-desc" placeholder="ระบุขอบเขตการทำงาน ความสามารถสั้นๆ เพื่อให้คนเข้าชมเข้าใจเบื้องต้น..." class="w-full px-4 py-2.5 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                             </div>
                             <div>
-                                <label class="block text-xs text-gray-400 mb-1.5 font-semibold">อัปโหลดไฟล์เดโมระบบ (.html เท่านั้น)</label>
-                                <input type="file" id="add-sys-demo-file" accept=".html" class="w-full px-4 py-2 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
+                                <label class="block text-xs text-gray-400 mb-1.5 font-semibold">ทางเลือกที่ 1: ลิงก์เดโมระบบ (Demo URL)</label>
+                                <input type="text" id="add-sys-demo-url" placeholder="เช่น https://..." class="w-full px-4 py-2.5 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                                 <p class="text-[9px] text-amber-400/80 mt-1.5 leading-relaxed">
-                                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> <b>ข้อแนะนำ:</b> ไฟล์ HTML ต้องรวม CSS/JS ไว้ในไฟล์เดียว (Inline) หรือใช้ลิงก์แบบ CDN เท่านั้น ไม่สามารถดึงไฟล์ .js หรือ .css แยกต่างหากในโฟลเดอร์ได้
+                                    * สำหรับลิงก์จาก Vercel, Netlify หรือ GitHub Pages
+                                </p>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-1.5 font-semibold">ทางเลือกที่ 2: อัปโหลดไฟล์เดโม HTML (.html)</label>
+                                <input type="file" id="add-sys-demo-file" accept=".html" class="w-full px-4 py-2 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
+                                <p class="text-[9px] text-emerald-400/80 mt-1.5 leading-relaxed">
+                                    * แนะนำ: อัปโหลดไฟล์ HTML เพื่อให้ระบบรันใน Sandbox ได้ทันทีโดยไม่ต้องโฮสต์
                                 </p>
                             </div>
                             <div>
@@ -807,15 +814,18 @@
                     <input type="file" id="edit-sys-images" accept="image/*" multiple class="w-full px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
                     <p class="text-[10px] text-gray-500 mt-1">* เว้นว่างไว้หากไม่ต้องการเปลี่ยนรูปภาพเดิม</p>
                 </div>
-                <div class="md:col-span-2">
-                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold">อัปโหลดไฟล์เดโมระบบใหม่ (.html เท่านั้น)</label>
-                    <input type="file" id="edit-sys-demo-file" accept=".html" class="w-full px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
-                    <div class="flex items-center gap-2 mt-2">
-                        <input type="checkbox" id="edit-sys-clear-demo" class="w-4 h-4 rounded border-white/10 bg-gray-950 text-indigo-600 focus:ring-indigo-500">
-                        <label for="edit-sys-clear-demo" class="text-[10px] text-amber-400 font-semibold cursor-pointer">ลบไฟล์เดโมเดิมทิ้ง (เพื่อใช้ Demo URL/Link แทน)</label>
-                    </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold">ลิงก์เดโมระบบใหม่ (Demo URL)</label>
+                    <input type="text" id="edit-sys-demo-url" placeholder="เช่น https://..." class="w-full px-4 py-2.5 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                     <p class="text-[9px] text-amber-400/80 mt-1.5 leading-relaxed">
-                        <i class="fa-solid fa-triangle-exclamation mr-1"></i> <b>ข้อแนะนำ:</b> ไฟล์ HTML ต้องรวม CSS/JS ไว้ในไฟล์เดียว (Inline) หรือใช้ลิงก์แบบ CDN เท่านั้น ไม่สามารถดึงไฟล์ .js หรือ .css แยกต่างหากในโฟลเดอร์ได้
+                        * สำหรับลิงก์จาก Vercel, Netlify หรือ GitHub Pages
+                    </p>
+                </div>
+                <div>
+                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold">หรือ อัปโหลดไฟล์เดโม HTML ใหม่ (.html)</label>
+                    <input type="file" id="edit-sys-demo-file" accept=".html" class="w-full px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
+                    <p id="edit-sys-demo-status" class="text-[9px] text-emerald-400/80 mt-1.5 leading-relaxed">
+                        * แนะนำ: อัปโหลดไฟล์ HTML เพื่อให้ระบบรันใน Sandbox ได้ทันทีโดยไม่ต้องโฮสต์
                     </p>
                 </div>
                 <div class="md:col-span-2">
@@ -1532,7 +1542,7 @@
 
         function openSandbox(id) {
             const sys = systemsDatabase.find(s => s.id === id);
-            if (sys && sys.demoHtml) {
+            if (sys && (sys.demoHtml || sys.demoUrl)) {
                 // ตรวจสอบ Secure Context และ Protocol
                 if (window.location.protocol === 'file:') {
                     alert("⚠️ ตรวจพบว่าคุณเปิดไฟล์ผ่านโฟลเดอร์โดยตรง (file://)\n\nเบราว์เซอร์จะไม่ขอนุญาตให้ใช้งานไมโครโฟนหรือกล้องในโหมด Sandbox ได้หากไม่ได้ใช้งานผ่าน Web Server\n\nแนะนำ: ให้ใช้งานผ่าน 'Live Server' ใน VS Code หรืออัปโหลดขึ้นโฮสติ้งจริง (HTTPS) เพื่อทดสอบฟังก์ชันนี้ครับ");
@@ -1549,13 +1559,32 @@
                 // Revoke old URL if exists
                 if (currentSandboxBlobUrl) {
                     URL.revokeObjectURL(currentSandboxBlobUrl);
+                    currentSandboxBlobUrl = null;
                 }
 
-                // Create blob and set iframe src
-                const blob = new Blob([sys.demoHtml], { type: 'text/html' });
-                currentSandboxBlobUrl = URL.createObjectURL(blob);
+                if (sys.demoUrl) {
+                    // ถ้าเป็นลิงก์ ให้ตรวจสอบว่าเป็น Google Drive หรือไม่
+                    const finalUrl = transformVideoLink(sys.demoUrl).src; // ใช้ฟังก์ชันที่มีอยู่แล้วแปลงลิงก์ Drive/YouTube
+                    iframe.removeAttribute('srcdoc');
+                    iframe.src = finalUrl;
+                } else {
+                    // ฉีดสคริปต์ล้าง Storage เพื่อให้เป็น Sandbox ที่แท้จริง (คืนค่าเดิมทุกครั้งที่เปิด)
+                    const resetScript = `<script>
+                        (function() {
+                            try {
+                                localStorage.clear();
+                                sessionStorage.clear();
+                                console.log("Sandbox Storage Cleared");
+                            } catch(e) { console.error("Sandbox reset error:", e); }
+                        })();
+                    <\/script>`;
+
+                    const finalHtml = resetScript + sys.demoHtml;
+
+                    iframe.removeAttribute('src');
+                    iframe.srcdoc = finalHtml;
+                }
                 
-                iframe.src = currentSandboxBlobUrl;
                 openModal('sandbox-modal');
             }
         }
@@ -1635,7 +1664,7 @@
                         badgeHTML = `<span class="absolute top-3 right-3 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase z-10 backdrop-blur-md">FREE</span>`;
                         
                         let demoButtonHTML = "";
-                        if (sys.demoHtml) {
+                        if (sys.demoHtml || sys.demoUrl) {
                             demoButtonHTML = `<button onclick="openSandbox('${sys.id}')" class="flex-1 text-center bg-emerald-600/20 border-emerald-500/30 text-emerald-300 border hover:bg-white/10 text-xs font-semibold py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center">ทดสอบระบบ</button>`;
                         }
                         
@@ -1648,7 +1677,7 @@
                         badgeHTML = `<span class="absolute top-3 right-3 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase z-10 backdrop-blur-md">Premium</span>`;
                         
                         let demoButtonHTML = "";
-                        if (sys.demoHtml) {
+                        if (sys.demoHtml || sys.demoUrl) {
                             demoButtonHTML = `<button onclick="openSandbox('${sys.id}')" class="flex-1 text-center bg-indigo-500/20 border border-indigo-500/30 hover:bg-indigo-500/30 text-cyan-300 text-xs font-bold py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center">ทดสอบระบบ</button>`;
                         }
                         
@@ -2156,8 +2185,20 @@
                 document.getElementById('edit-sys-price').value = sys.price || 1;
                 document.getElementById('edit-sys-downloads').value = sys.downloads || 0;
                 document.getElementById('edit-sys-images').value = ""; // Clear multi image input
-                document.getElementById('edit-sys-demo-file').value = ""; // Clear demo file input
-                document.getElementById('edit-sys-clear-demo').checked = false; // Reset clear demo checkbox
+                document.getElementById('edit-sys-demo-url').value = sys.demoUrl || ""; // Populate Demo URL
+                if (document.getElementById('edit-sys-demo-file')) document.getElementById('edit-sys-demo-file').value = ""; // Clear file input
+                
+                const statusEl = document.getElementById('edit-sys-demo-status');
+                if (statusEl) {
+                    if (sys.demoHtml) {
+                        statusEl.innerHTML = `<span class="text-emerald-400 font-bold"><i class="fa-solid fa-circle-check"></i> มีไฟล์ HTML ในระบบแล้ว</span> (ขนาด ${(sys.demoHtml.length/1024).toFixed(1)} KB)`;
+                    } else if (sys.demoUrl) {
+                        statusEl.innerHTML = `<span class="text-cyan-400 font-bold"><i class="fa-solid fa-link"></i> ใช้ลิงก์ภายนอก</span>`;
+                    } else {
+                        statusEl.innerHTML = `<span class="text-gray-500">ไม่มีการตั้งค่าเดโม</span>`;
+                    }
+                }
+
                 document.getElementById('edit-sys-desc').value = sys.desc;
                 document.getElementById('edit-sys-source').value = sys.source;
                 togglePriceInput('edit'); // อัปเดตการแสดงผลช่องกรอกราคา
@@ -2180,10 +2221,10 @@
             
             // 1. อ่านข้อมูลไฟล์ใหม่ก่อน (ถ้ามี)
             var fileInput = document.getElementById('edit-sys-images');
+            var demoUrl = document.getElementById('edit-sys-demo-url').value.trim();
             var demoFileInput = document.getElementById('edit-sys-demo-file');
             
             var newImageUrls = null;
-            var newDemoHtmlContent = null;
 
             if (fileInput.files && fileInput.files.length > 0) {
                 newImageUrls = [];
@@ -2192,11 +2233,12 @@
                     newImageUrls.push(await readFileAsDataURL(fileInput.files[i]));
                 }
             }
-            
-            if (demoFileInput.files && demoFileInput.files[0]) {
-                newDemoHtmlContent = await readFileAsText(demoFileInput.files[0]);
-            }
 
+            var newDemoHtml = null;
+            if (demoFileInput && demoFileInput.files && demoFileInput.files[0]) {
+                newDemoHtml = await readFileAsText(demoFileInput.files[0]);
+            }
+            
             // 2. ค้นหาข้อมูลระบบใน database อีกครั้งหลังจาก await เพื่อป้องกัน race condition
             var sysIndex = systemsDatabase.findIndex(s => s.id === id);
             
@@ -2207,11 +2249,13 @@
                     systemsDatabase[sysIndex].images = newImageUrls;
                 }
                 
-                // อัปเดตไฟล์เดโม (ถ้ามีการเลือกใหม่ หรือต้องการลบของเก่า)
-                if (newDemoHtmlContent !== null) {
-                    systemsDatabase[sysIndex].demoHtml = newDemoHtmlContent;
-                } else if (document.getElementById('edit-sys-clear-demo').checked) {
-                    systemsDatabase[sysIndex].demoHtml = ""; // ล้างข้อมูล HTML เพื่อให้ไปใช้ Demo URL แทน
+                // อัปเดตเดโม
+                if (newDemoHtml !== null) {
+                    systemsDatabase[sysIndex].demoHtml = newDemoHtml;
+                    systemsDatabase[sysIndex].demoUrl = "";
+                } else {
+                    systemsDatabase[sysIndex].demoUrl = demoUrl;
+                    if (demoUrl) systemsDatabase[sysIndex].demoHtml = ""; // ล้าง HTML เก่าถ้ากรอก URL ใหม่
                 }
 
                 // อัปเดตข้อมูลส่วนอื่นๆ
@@ -2260,6 +2304,7 @@
                 if (id === 'sandbox-modal') {
                     const iframe = document.getElementById('sandbox-iframe');
                     iframe.src = "about:blank";
+                    iframe.removeAttribute('srcdoc');
                     if (currentSandboxBlobUrl) {
                         URL.revokeObjectURL(currentSandboxBlobUrl);
                         currentSandboxBlobUrl = null;
@@ -2556,6 +2601,7 @@
             var price = parseInt(document.getElementById('add-sys-price').value) || 1;
             var downloads = parseInt(document.getElementById('add-sys-downloads').value) || 0;
             var fileInput = document.getElementById('add-sys-images');
+            var demoUrl = document.getElementById('add-sys-demo-url').value.trim();
             var demoFileInput = document.getElementById('add-sys-demo-file');
             var desc = document.getElementById('add-sys-desc').value.trim();
             var sourceUrl = document.getElementById('add-sys-source').value.trim();
@@ -2574,10 +2620,11 @@
             } else {
                 imageUrls.push("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80");
             }
-            
-            var demoHtmlContent = "";
-            if (demoFileInput.files && demoFileInput.files[0]) {
-                demoHtmlContent = await readFileAsText(demoFileInput.files[0]);
+
+            var demoHtml = "";
+            if (demoFileInput && demoFileInput.files && demoFileInput.files[0]) {
+                demoHtml = await readFileAsText(demoFileInput.files[0]);
+                demoUrl = ""; // ล้าง URL ถ้ามีการอัปโหลดไฟล์ HTML
             }
             
             if (!sourceUrl) sourceUrl = "https://github.com/";
@@ -2589,7 +2636,8 @@
                 image: imageUrls[0], // First image as cover
                 images: imageUrls,   // Array of up to 4 images
                 desc: desc,
-                demoHtml: demoHtmlContent,
+                demoUrl: demoUrl,    
+                demoHtml: demoHtml,        
                 source: sourceUrl,
                 price: price,
                 downloads: downloads
@@ -2610,7 +2658,8 @@
             document.getElementById('add-sys-price').value = "1";
             document.getElementById('add-sys-downloads').value = "0";
             document.getElementById('add-sys-images').value = "";
-            document.getElementById('add-sys-demo-file').value = "";
+            document.getElementById('add-sys-demo-url').value = "";
+            if (document.getElementById('add-sys-demo-file')) document.getElementById('add-sys-demo-file').value = "";
             document.getElementById('add-sys-desc').value = "";
             document.getElementById('add-sys-source').value = "";
             togglePriceInput('add');
