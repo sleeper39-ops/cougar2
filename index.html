@@ -2328,6 +2328,14 @@
                     await firebase.database().ref('payments').push(record);
                     alert('ส่งข้อมูลการชำระเงินเรียบร้อยแล้ว!\n\nกรุณารอแอดมินตรวจสอบยอดเงินสักครู่ครับ เมื่อแอดมินยืนยันแล้ว ปุ่ม "โหลดโค้ด" จะปรากฏขึ้นมาแทนที่ปุ่มสแกนจ่ายครับ');
                 } catch (e) {
+                    console.error("Firebase save error:", e);
+                    alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + e.message);
+                }
+            } else {
+                // โหมด Demo
+                paymentDatabase.push(record);
+                alert('ส่งข้อมูลจำลองเรียบร้อยแล้ว (โหมด Demo)');
+            }
             
             closeModal('payment-modal');
             renderAdminTable();
