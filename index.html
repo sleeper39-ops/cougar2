@@ -1064,7 +1064,15 @@
             // โหลดรายการชำระเงิน
             db.ref('payments').on('value', (snapshot) => {
                 const data = snapshot.val();
-                paymentDatabase = data ? Object.values(data).reverse() : [];
+                if (data) {
+                    // เก็บทั้ง Key และ Data เพื่อใช้ใน Admin Table และ Catalog
+                    paymentDatabase = Object.entries(data).map(([key, value]) => ({
+                        ...value,
+                        firebaseKey: key
+                    })).reverse();
+                } else {
+                    paymentDatabase = [];
+                }
                 renderAdminTable();
                 renderCatalog(); // เพิ่มการ Render แคตตาล็อกใหม่เมื่อมีการชำระเงินหรืออัปเดตสถานะ
             });
@@ -1535,7 +1543,12 @@
                     
                     let badgeHTML = "";
                     let actionButtonsHTML = "";
-                    const isPurchased = purchasedSystems.includes(sys.id);
+                    
+                    // ตรวจสอบการซื้อจาก 2 แหล่ง: 
+                    // 1. จาก purchasedSystems (สิทธิ์ถาวรใน Database)
+                    // 2. จาก paymentDatabase (สถานะ 'จัดส่งโค้ดแล้ว' ในรายการชำระเงิน)
+                    const isPurchased = purchasedSystems.includes(sys.id) || 
+                                       paymentDatabase.some(p => p.systemId === sys.id && p.buyerUid === (currentUser ? currentUser.uid : '') && p.status === 'จัดส่งโค้ดแล้ว');
 
                     // Safety checks and escaping
                     const sysTitle = (sys.title || "Untitled System").replace(/"/g, '&quot;');
@@ -2374,6 +2387,8 @@
             var incomeEl = document.getElementById('adm-total-income');
             var countEl = document.getElementById('adm-success-count');
             
+            if (!tbody) return;
+
             if (firebaseConfig.apiKey === "YOUR_API_KEY") {
                 // โหมด Demo
                 if (paymentDatabase.length === 0) {
@@ -2387,54 +2402,50 @@
                 return;
             }
 
-            // โหมดใช้งานจริง: ดึงจาก Firebase Payments
-            firebase.database().ref('payments').on('value', (snapshot) => {
-                const data = snapshot.val();
-                if (!data) {
-                    tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-gray-500 text-sm">ยังไม่มีรายการชำระเงินเข้ามา</td></tr>`;
-                    incomeEl.innerText = "฿0.00";
-                    countEl.innerText = "0 รายการ";
-                    return;
+            // โหมดใช้งานจริง: ใช้ข้อมูลจาก paymentDatabase ที่โหลดมาแล้ว
+            if (paymentDatabase.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="p-10 text-center text-gray-500 text-sm">ยังไม่มีรายการชำระเงินเข้ามา</td></tr>`;
+                if (incomeEl) incomeEl.innerText = "฿0.00";
+                if (countEl) countEl.innerText = "0 รายการ";
+                return;
+            }
+
+            tbody.innerHTML = "";
+            var totalIncome = 0;
+            var successCount = 0;
+
+            paymentDatabase.forEach(function(item) {
+                if (item.status === 'จัดส่งโค้ดแล้ว') {
+                    totalIncome += (item.price || 0);
+                    successCount++;
                 }
-
-                tbody.innerHTML = "";
-                var totalIncome = 0;
-                var successCount = 0;
-
-                const entries = Object.entries(data).reverse();
-                entries.forEach(function([key, item]) {
-                    if (item.status === 'จัดส่งโค้ดแล้ว') {
-                        totalIncome += (item.price || 0);
-                        successCount++;
-                    }
-                    
-                    var statusColor = item.status === 'รอดำเนินการ' ? 'text-amber-400 bg-amber-400/10 border-amber-500/20' : 'text-emerald-400 bg-emerald-400/10 border-emerald-500/20';
-                    
-                    var tr = document.createElement('tr');
-                    tr.className = "hover:bg-white/[0.02] transition-colors";
-                    tr.innerHTML = `
-                        <td class="p-4 text-gray-400 font-mono text-xs">${item.timestamp}</td>
-                        <td class="p-4">
-                            <div class="text-white font-bold text-xs">${item.buyerName}</div>
-                            <div class="text-[10px] text-gray-500">${item.buyerEmail}</div>
-                        </td>
-                        <td class="p-4 text-white font-medium">${item.systemName}</td>
-                        <td class="p-4 font-mono font-bold text-emerald-400">฿${item.price}.00</td>
-                        <td class="p-4">
-                            <span class="px-3 py-1 rounded border text-xs font-bold ${statusColor}">${item.status}</span>
-                        </td>
-                        <td class="p-4 text-right">
-                            <button onclick="toggleDeliveryStatus('${key}', '${item.buyerUid}', '${item.systemId}')" class="bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded text-xs font-semibold transition-all">
-                                <i class="fa-solid fa-check-double mr-1"></i> อนุมัติ/สลับ
-                            </button>
-                        </td>
-                    `;
-                    tbody.appendChild(tr);
-                });
                 
-                incomeEl.innerText = "฿" + totalIncome + ".00";
-                countEl.innerText = successCount + " รายการ";
+                var statusColor = item.status === 'รอดำเนินการ' ? 'text-amber-400 bg-amber-400/10 border-amber-500/20' : 'text-emerald-400 bg-emerald-400/10 border-emerald-500/20';
+                
+                var tr = document.createElement('tr');
+                tr.className = "hover:bg-white/[0.02] transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4 text-gray-400 font-mono text-xs">${item.timestamp}</td>
+                    <td class="p-4">
+                        <div class="text-white font-bold text-xs">${item.buyerName}</div>
+                        <div class="text-[10px] text-gray-500">${item.buyerEmail}</div>
+                    </td>
+                    <td class="p-4 text-white font-medium">${item.systemName}</td>
+                    <td class="p-4 font-mono font-bold text-emerald-400">฿${item.price}.00</td>
+                    <td class="p-4">
+                        <span class="px-3 py-1 rounded border text-xs font-bold ${statusColor}">${item.status}</span>
+                    </td>
+                    <td class="p-4 text-right">
+                        <button onclick="toggleDeliveryStatus('${item.firebaseKey}', '${item.buyerUid}', '${item.systemId}')" class="bg-indigo-600/30 hover:bg-indigo-600/50 text-indigo-300 border border-indigo-500/30 px-3 py-1.5 rounded text-xs font-semibold transition-all">
+                            <i class="fa-solid fa-check-double mr-1"></i> อนุมัติ/สลับ
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
+            
+            if (incomeEl) incomeEl.innerText = "฿" + totalIncome + ".00";
+            if (countEl) countEl.innerText = successCount + " รายการ";
         }
 
         // ==========================================
