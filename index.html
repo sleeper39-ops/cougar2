@@ -111,7 +111,7 @@
                     </a>
                 </div>
 
-                <button onclick="openModal('admin-login-modal')" class="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-4 py-2 rounded-lg hover:bg-red-500/20 transition-all text-red-400 font-bold">
+                <button onclick="openAdminSystem()" class="flex items-center gap-2 bg-red-500/10 border border-red-500/30 px-4 py-2 rounded-lg hover:bg-red-500/20 transition-all text-red-400 font-bold">
                     <i class="fa-solid fa-user-shield"></i> ระบบแอดมิน
                 </button>
             </nav>
@@ -459,7 +459,12 @@
                     <i class="fa-solid fa-chart-line text-lg"></i>
                     <h3 class="heading-font text-base md:text-lg font-bold text-white">ระบบจัดการหลังบ้านและการเงิน (Admin Dashboard)</h3>
                 </div>
-                <button onclick="closeModal('admin-dashboard-modal')" class="text-gray-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+                <div class="flex items-center gap-4">
+                    <button onclick="adminLogout()" class="bg-red-600/20 hover:bg-red-600/40 text-red-400 border border-red-500/30 px-4 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-right-from-bracket"></i> ออกจากระบบ
+                    </button>
+                    <button onclick="closeModal('admin-dashboard-modal')" class="text-gray-400 hover:text-white text-xl"><i class="fa-solid fa-xmark"></i></button>
+                </div>
             </div>
 
             <!-- Tab Navigation -->
@@ -537,11 +542,6 @@
                                 <p class="text-[9px] text-amber-400/80 mt-1.5 leading-relaxed">
                                     <i class="fa-solid fa-triangle-exclamation mr-1"></i> <b>ข้อแนะนำ:</b> ไฟล์ HTML ต้องรวม CSS/JS ไว้ในไฟล์เดียว (Inline) หรือใช้ลิงก์แบบ CDN เท่านั้น ไม่สามารถดึงไฟล์ .js หรือ .css แยกต่างหากในโฟลเดอร์ได้
                                 </p>
-                            </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1.5 font-semibold">ลิงก์ทดลองใช้งานเดโม (Demo URL / Function)</label>
-                                <input type="text" id="add-sys-demo" placeholder="https://..." class="w-full px-4 py-2.5 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
-                                <p class="text-[9px] text-gray-500 mt-1">* ใช้ในกรณีที่ไม่ได้อัปโหลดไฟล์ HTML</p>
                             </div>
                             <div>
                                 <label class="block text-xs text-gray-400 mb-1.5 font-semibold">ยอดดาวน์โหลดเริ่มต้น</label>
@@ -763,10 +763,6 @@
                 <div class="md:col-span-2">
                     <label class="block text-xs text-gray-400 mb-1.5 font-semibold">คำอธิบายฟังก์ชันระบบ (Description)</label>
                     <textarea id="edit-sys-desc" rows="3" class="w-full px-4 py-2.5 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500"></textarea>
-                </div>
-                <div>
-                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold">Demo URL / Function</label>
-                    <input type="text" id="edit-sys-demo" class="w-full px-4 py-2.5 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div>
                     <label class="block text-xs text-gray-400 mb-1.5 font-semibold">Source Code URL</label>
@@ -1136,6 +1132,7 @@
 
         // เรียกใช้ฟังก์ชัน Render เริ่มต้น
         window.onload = function() {
+            checkAdminSession();
             if (firebaseConfig.apiKey === "YOUR_API_KEY" || firebaseConfig.apiKey === "") {
                 renderCatalog();
             }
@@ -1281,7 +1278,6 @@
                     const sysTitle = (sys.title || "Untitled System").replace(/"/g, '&quot;');
                     const sysDesc = (sys.desc || "No description provided.").replace(/"/g, '&quot;');
                     const sysImage = sys.image || "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80";
-                    const sysDemo = sys.demo || "#";
                     const sysSource = sys.source || "https://github.com/";
                     
                     // Ensure images is an array
@@ -1302,40 +1298,32 @@
                         newCard.classList.add("hover:border-emerald-500/30");
                         badgeHTML = `<span class="absolute top-3 right-3 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase z-10 backdrop-blur-md">FREE</span>`;
                         
-                        let demoAction = "";
+                        let demoButtonHTML = "";
                         if (sys.demoHtml) {
-                            demoAction = `onclick="openSandbox('${sys.id}')"`;
-                        } else {
-                            demoAction = sysDemo.startsWith('http') ? `href="${sysDemo}" target="_blank"` : `onclick="${sysDemo}"`;
+                            demoButtonHTML = `<button onclick="openSandbox('${sys.id}')" class="flex-1 text-center bg-emerald-600/20 border-emerald-500/30 text-emerald-300 border hover:bg-white/10 text-xs font-semibold py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center">ทดสอบระบบ</button>`;
                         }
                         
-                        const demoLabel = 'ทดสอบระบบ';
-                        const demoClass = 'bg-emerald-600/20 border-emerald-500/30 text-emerald-300';
-                        
                         actionButtonsHTML = `
-                            <${sysDemo.startsWith('http') && !sys.demoHtml ? 'a' : 'button'} ${demoAction} class="flex-1 text-center ${demoClass} border hover:bg-white/10 text-xs font-semibold py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center">${demoLabel}</${sysDemo.startsWith('http') && !sys.demoHtml ? 'a' : 'button'}>
+                            ${demoButtonHTML}
                             <a href="${sysSource}" target="_blank" class="flex-1 text-center btn-gradient text-white text-xs font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 shadow-md"><i class="fa-brands fa-github"></i> โหลดโค้ด</a>
                         `;
                     } else {
                         newCard.classList.add("hover:border-indigo-500/30");
                         badgeHTML = `<span class="absolute top-3 right-3 bg-cyan-500/20 border border-cyan-500/30 text-cyan-400 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase z-10 backdrop-blur-md">Premium</span>`;
                         
-                        let demoAction = "";
+                        let demoButtonHTML = "";
                         if (sys.demoHtml) {
-                            demoAction = `onclick="openSandbox('${sys.id}')"`;
-                        } else {
-                            demoAction = sysDemo.startsWith('http') ? `href="${sysDemo}" target="_blank"` : `onclick="${sysDemo}"`;
+                            demoButtonHTML = `<button onclick="openSandbox('${sys.id}')" class="flex-1 text-center bg-indigo-500/20 border border-indigo-500/30 hover:bg-indigo-500/30 text-cyan-300 text-xs font-bold py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center">ทดสอบระบบ</button>`;
                         }
-                        const demoLabel = 'ทดสอบระบบ';
                         
                         if (isPurchased) {
                             actionButtonsHTML = `
-                                <${sysDemo.startsWith('http') && !sys.demoHtml ? 'a' : 'button'} ${demoAction} class="flex-1 text-center bg-indigo-500/20 border border-indigo-500/30 hover:bg-indigo-500/30 text-cyan-300 text-xs font-bold py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center">${demoLabel}</${sysDemo.startsWith('http') && !sys.demoHtml ? 'a' : 'button'}>
+                                ${demoButtonHTML}
                                 <a href="${sysSource}" target="_blank" class="flex-1 text-center btn-gradient text-white text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 shadow-md animate-bounce"><i class="fa-solid fa-download"></i> โหลดโค้ด</a>
                             `;
                         } else {
                             actionButtonsHTML = `
-                                <${sysDemo.startsWith('http') && !sys.demoHtml ? 'a' : 'button'} ${demoAction} class="flex-1 text-center bg-indigo-500/20 border border-indigo-500/30 hover:bg-indigo-500/30 text-cyan-300 text-xs font-bold py-2.5 rounded-xl shadow-sm transition-all flex items-center justify-center">${demoLabel}</${sysDemo.startsWith('http') && !sys.demoHtml ? 'a' : 'button'}>
+                                ${demoButtonHTML}
                                 <button onclick="openPaymentModal('${sys.id}', '${escapedTitleForJS}', ${sys.price || 1})" class="flex-1 text-center bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 hover:bg-cyan-500/20 text-xs font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 shadow-md"><i class="fa-solid fa-qrcode"></i> สแกนจ่าย (฿${sys.price || 1})</button>
                             `;
                         }
@@ -1676,7 +1664,6 @@
                 document.getElementById('edit-sys-demo-file').value = ""; // Clear demo file input
                 document.getElementById('edit-sys-clear-demo').checked = false; // Reset clear demo checkbox
                 document.getElementById('edit-sys-desc').value = sys.desc;
-                document.getElementById('edit-sys-demo').value = sys.demo;
                 document.getElementById('edit-sys-source').value = sys.source;
                 togglePriceInput('edit'); // อัปเดตการแสดงผลช่องกรอกราคา
                 openModal('edit-system-modal');
@@ -1738,7 +1725,6 @@
                 systemsDatabase[sysIndex].price = parseInt(document.getElementById('edit-sys-price').value) || 1;
                 systemsDatabase[sysIndex].downloads = parseInt(document.getElementById('edit-sys-downloads').value) || 0;
                 systemsDatabase[sysIndex].desc = document.getElementById('edit-sys-desc').value.trim();
-                systemsDatabase[sysIndex].demo = document.getElementById('edit-sys-demo').value.trim();
                 systemsDatabase[sysIndex].source = document.getElementById('edit-sys-source').value.trim();
                 
                 // บันทึกเฉพาะรายการที่แก้ไขลง Firebase (มีประสิทธิภาพกว่า)
@@ -1858,6 +1844,9 @@
             var pass = document.getElementById('admin-pass').value.trim();
             
             if (user === 'admin' && pass === 'admin') {
+                // เก็บสถานะการเข้าสู่ระบบไว้ใน localStorage
+                localStorage.setItem('isAdminLoggedIn', 'true');
+                
                 closeModal('admin-login-modal');
                 document.getElementById('admin-user').value = '';
                 document.getElementById('admin-pass').value = '';
@@ -1866,6 +1855,33 @@
                 switchAdminTab('add'); // Default tab
             } else {
                 alert('Admin ID หรือ รหัสผ่านไม่ถูกต้อง! กรุณาลองใหม่อีกครั้ง');
+            }
+        }
+
+        function adminLogout() {
+            if (confirm('คุณต้องการออกจากระบบแอดมินใช่หรือไม่?')) {
+                localStorage.removeItem('isAdminLoggedIn');
+                closeModal('admin-dashboard-modal');
+                alert('ออกจากระบบเรียบร้อยแล้ว');
+            }
+        }
+
+        // ตรวจสอบสถานะแอดมินเมื่อโหลดหน้าเว็บ
+        function checkAdminSession() {
+            const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
+            if (isLoggedIn === 'true') {
+                console.log("Admin session active");
+            }
+        }
+
+        function openAdminSystem() {
+            const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
+            if (isLoggedIn === 'true') {
+                renderAdminTable();
+                openModal('admin-dashboard-modal');
+                switchAdminTab('add');
+            } else {
+                openModal('admin-login-modal');
             }
         }
 
@@ -1937,7 +1953,6 @@
             var fileInput = document.getElementById('add-sys-images');
             var demoFileInput = document.getElementById('add-sys-demo-file');
             var desc = document.getElementById('add-sys-desc').value.trim();
-            var demoUrl = document.getElementById('add-sys-demo').value.trim();
             var sourceUrl = document.getElementById('add-sys-source').value.trim();
 
             if (!title || !desc) {
@@ -1960,7 +1975,6 @@
                 demoHtmlContent = await readFileAsText(demoFileInput.files[0]);
             }
             
-            if (!demoUrl) demoUrl = "#";
             if (!sourceUrl) sourceUrl = "https://github.com/";
 
             var newSys = {
@@ -1970,7 +1984,6 @@
                 image: imageUrls[0], // First image as cover
                 images: imageUrls,   // Array of up to 4 images
                 desc: desc,
-                demo: demoUrl,
                 demoHtml: demoHtmlContent,
                 source: sourceUrl,
                 price: price,
@@ -1994,7 +2007,6 @@
             document.getElementById('add-sys-images').value = "";
             document.getElementById('add-sys-demo-file').value = "";
             document.getElementById('add-sys-desc').value = "";
-            document.getElementById('add-sys-demo').value = "";
             document.getElementById('add-sys-source').value = "";
             togglePriceInput('add');
 
