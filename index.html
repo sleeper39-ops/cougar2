@@ -409,8 +409,8 @@
             <p class="text-xs text-gray-400 mb-4">สแกนคิวอาร์โค้ดด้านล่างเพื่อชำระเงินผ่านแอปธนาคาร</p>
             
             <div class="bg-white p-4 rounded-xl inline-block shadow-inner mb-4 relative group">
-                <!-- ใช้ QR Code Generator API เพื่อให้มั่นใจว่ารูปจะขึ้นแน่นอน -->
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=COUGAR2-PAYMENT-SYSTEM" alt="QR Code" class="w-44 h-44 mx-auto object-contain">
+                <!-- ดึงรูป QR Code จาก Admin Settings -->
+                <img id="payment-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=COUGAR2-PAYMENT-SYSTEM" alt="QR Code" class="w-44 h-44 mx-auto object-contain">
                 <div class="absolute inset-0 bg-emerald-600/90 text-white flex flex-col items-center justify-center rounded-xl opacity-0 group-hover:opacity-100 transition-opacity p-2 text-center">
                     <i class="fa-solid fa-shield-check text-white text-xl mb-1"></i>
                     <p class="text-[10px] leading-relaxed font-bold">สแกนจ่ายเพื่อใช้งานจริง<br>รองรับทุกแอปธนาคาร<br>ระบบจะแจ้งเตือนอัตโนมัติ</p>
@@ -677,35 +677,67 @@
 
                 <!-- Section: Account Settings -->
                 <div id="admin-section-settings" class="hidden space-y-6">
-                    <div class="bg-gray-950 border border-white/5 rounded-xl p-8 max-w-lg mx-auto shadow-2xl">
-                        <div class="flex items-center gap-3 mb-8 border-b border-white/5 pb-4">
-                            <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-xl">
-                                <i class="fa-solid fa-key"></i>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Password Change -->
+                        <div class="bg-gray-950 border border-white/5 rounded-xl p-8 shadow-2xl">
+                            <div class="flex items-center gap-3 mb-8 border-b border-white/5 pb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-xl">
+                                    <i class="fa-solid fa-key"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-white">เปลี่ยนรหัสผ่านแอดมิน</h4>
+                                    <p class="text-xs text-gray-500 uppercase tracking-widest">Update Security Credentials</p>
+                                </div>
                             </div>
-                            <div>
-                                <h4 class="text-lg font-bold text-white">เปลี่ยนรหัสผ่านแอดมิน</h4>
-                                <p class="text-xs text-gray-500 uppercase tracking-widest">Update Security Credentials</p>
+
+                            <div class="space-y-5">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">รหัสผ่านปัจจุบัน</label>
+                                    <input type="password" id="adm-old-pass" placeholder="กรอกรหัสผ่านเดิม" class="w-full px-4 py-3 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                                </div>
+                                <hr class="border-white/5">
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">รหัสผ่านใหม่</label>
+                                    <input type="password" id="adm-new-pass" placeholder="กำหนดรหัสผ่านใหม่" class="w-full px-4 py-3 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">ยืนยันรหัสผ่านใหม่</label>
+                                    <input type="password" id="adm-confirm-pass" placeholder="กรอกรหัสผ่านใหม่อีกครั้ง" class="w-full px-4 py-3 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                                </div>
+                                
+                                <button onclick="changeAdminPassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 mt-4">
+                                    <i class="fa-solid fa-shield-check"></i> บันทึกรหัสผ่านใหม่
+                                </button>
                             </div>
                         </div>
 
-                        <div class="space-y-5">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">รหัสผ่านปัจจุบัน</label>
-                                <input type="password" id="adm-old-pass" placeholder="กรอกรหัสผ่านเดิม" class="w-full px-4 py-3 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+                        <!-- QR Code Management -->
+                        <div class="bg-gray-950 border border-white/5 rounded-xl p-8 shadow-2xl">
+                            <div class="flex items-center gap-3 mb-8 border-b border-white/5 pb-4">
+                                <div class="w-12 h-12 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyan-400 text-xl">
+                                    <i class="fa-solid fa-qrcode"></i>
+                                </div>
+                                <div>
+                                    <h4 class="text-lg font-bold text-white">จัดการรูป QR Code รับเงิน</h4>
+                                    <p class="text-xs text-gray-500 uppercase tracking-widest">Update Payment QR Code</p>
+                                </div>
                             </div>
-                            <hr class="border-white/5">
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">รหัสผ่านใหม่</label>
-                                <input type="password" id="adm-new-pass" placeholder="กำหนดรหัสผ่านใหม่" class="w-full px-4 py-3 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
+
+                            <div class="flex flex-col items-center gap-6">
+                                <div class="bg-white p-4 rounded-2xl shadow-inner border border-white/10">
+                                    <img id="adm-qr-preview" src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=COUGAR2-PAYMENT-SYSTEM" class="w-48 h-48 object-contain">
+                                </div>
+                                
+                                <div class="w-full space-y-4">
+                                    <div>
+                                        <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">อัปโหลดรูป QR Code ใหม่</label>
+                                        <input type="file" id="adm-qr-input" accept="image/*" class="w-full px-4 py-2 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-cyan-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-cyan-500/10 file:text-cyan-400">
+                                    </div>
+                                    <button onclick="updateAdminQRCode()" class="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-cyan-600/20 flex items-center justify-center gap-2">
+                                        <i class="fa-solid fa-upload"></i> อัปโหลดและใช้งานทันที
+                                    </button>
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-xs font-bold text-gray-400 mb-2 uppercase">ยืนยันรหัสผ่านใหม่</label>
-                                <input type="password" id="adm-confirm-pass" placeholder="กรอกรหัสผ่านใหม่อีกครั้ง" class="w-full px-4 py-3 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 transition-all">
-                            </div>
-                            
-                            <button onclick="changeAdminPassword()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/20 flex items-center justify-center gap-2 mt-4">
-                                <i class="fa-solid fa-shield-check"></i> บันทึกรหัสผ่านใหม่
-                            </button>
                         </div>
                     </div>
                 </div>
@@ -983,6 +1015,10 @@
         
         var paymentDatabase = [];
         var systemsDatabase = []; // ลบระบบตัวอย่างออกเพื่อรอรับข้อมูลจริงจาก Firebase
+        var adminSettings = {
+            password: 'admin',
+            qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=COUGAR2-PAYMENT-SYSTEM'
+        };
 
         // ฟังก์ชันสำหรับดึงข้อมูลเริ่มต้นจาก Firebase
         function loadDataFromFirebase() {
@@ -994,6 +1030,25 @@
 
             const db = firebase.database();
             
+            // ปิด Listener เก่าก่อนเพื่อป้องกันการทำงานซ้ำซ้อน
+            db.ref('systems').off();
+            db.ref('payments').off();
+            db.ref('documents').off();
+            db.ref('tutorialVideos').off();
+            db.ref('adminSettings').off();
+            if (currentUser) db.ref(`users/${currentUser.uid}/purchasedSystems`).off();
+
+            // โหลดตั้งค่าแอดมิน (รหัสผ่าน และ QR Code)
+            db.ref('adminSettings').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    adminSettings = data;
+                    // อัปเดตรูป QR Code ในหน้าแอดมินถ้ามี
+                    const qrPreview = document.getElementById('adm-qr-preview');
+                    if (qrPreview) qrPreview.src = adminSettings.qrCodeUrl;
+                }
+            });
+
             // โหลดรายการระบบ
             db.ref('systems').on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -1006,11 +1061,12 @@
                 renderAdminSystemsTable();
             });
 
-            // โหลดรายการชำระเงิน (สำหรับแอดมิน)
+            // โหลดรายการชำระเงิน
             db.ref('payments').on('value', (snapshot) => {
                 const data = snapshot.val();
                 paymentDatabase = data ? Object.values(data).reverse() : [];
                 renderAdminTable();
+                renderCatalog(); // เพิ่มการ Render แคตตาล็อกใหม่เมื่อมีการชำระเงินหรืออัปเดตสถานะ
             });
 
             // โหลดรายการที่ซื้อแล้วของ User ปัจจุบัน
@@ -1529,10 +1585,22 @@
                                 <a href="${sysSource}" target="_blank" class="flex-1 text-center btn-gradient text-white text-xs font-bold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 shadow-md animate-bounce"><i class="fa-solid fa-download"></i> โหลดโค้ด</a>
                             `;
                         } else {
-                            actionButtonsHTML = `
-                                ${demoButtonHTML}
-                                <button onclick="openPaymentModal('${sys.id}', '${escapedTitleForJS}', ${sys.price || 1})" class="flex-1 text-center bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 hover:bg-cyan-500/20 text-xs font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 shadow-md"><i class="fa-solid fa-qrcode"></i> สแกนจ่าย (฿${sys.price || 1})</button>
-                            `;
+                            // ตรวจสอบสถานะการชำระเงินที่รอดำเนินการ
+                            const isPending = paymentDatabase.some(p => p.systemId === sys.id && p.buyerUid === (currentUser ? currentUser.uid : '') && p.status === 'รอดำเนินการ');
+                            
+                            if (isPending) {
+                                actionButtonsHTML = `
+                                    ${demoButtonHTML}
+                                    <button class="flex-1 text-center bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold py-2.5 rounded-xl cursor-wait flex items-center justify-center gap-2 shadow-md">
+                                        <i class="fa-solid fa-clock-rotate-left animate-spin text-amber-500"></i> กำลังตรวจสอบ...
+                                    </button>
+                                `;
+                            } else {
+                                actionButtonsHTML = `
+                                    ${demoButtonHTML}
+                                    <button onclick="openPaymentModal('${sys.id}', '${escapedTitleForJS}', ${sys.price || 1})" class="flex-1 text-center bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 hover:bg-cyan-500/20 text-xs font-semibold py-2.5 rounded-xl transition-all flex items-center justify-center gap-1 shadow-md"><i class="fa-solid fa-qrcode"></i> สแกนจ่าย (฿${sys.price || 1})</button>
+                                `;
+                            }
                         }
                     }
 
@@ -1642,9 +1710,8 @@
             const newPass = document.getElementById('adm-new-pass').value;
             const confirmPass = document.getElementById('adm-confirm-pass').value;
 
-            // ตรวจสอบรหัสผ่านเดิม (ในที่นี้คือ 'admin' ตามโค้ดเริ่มต้น)
-            // หมายเหตุ: ในระบบจริงควรดึงจาก Database/Storage
-            if (oldPass !== 'admin') {
+            // ตรวจสอบรหัสผ่านเดิมจาก Firebase (adminSettings)
+            if (oldPass !== adminSettings.password) {
                 alert('รหัสผ่านปัจจุบันไม่ถูกต้อง!');
                 return;
             }
@@ -1659,16 +1726,49 @@
                 return;
             }
 
-            // ในระบบจำลองนี้ เราจะแจ้งเตือนว่าเปลี่ยนสำเร็จ 
-            // แต่เนื่องจากไม่มี Backend ข้อมูลจะกลับเป็น 'admin' เมื่อ Refresh หน้าเว็บ
-            alert('เปลี่ยนรหัสผ่านแอดมินเรียบร้อยแล้ว!\n(หมายเหตุ: นี่คือระบบจำลอง ข้อมูลจะคืนค่าเดิมเมื่อ Refresh หน้าเว็บ)');
-            
-            // ล้างค่าในช่องกรอก
-            document.getElementById('adm-old-pass').value = "";
-            document.getElementById('adm-new-pass').value = "";
-            document.getElementById('adm-confirm-pass').value = "";
-            
-            switchAdminTab('manage');
+            if (confirm('คุณต้องการเปลี่ยนรหัสผ่านแอดมินใช่หรือไม่?')) {
+                // อัปเดตข้อมูลลง Firebase
+                const db = firebase.database();
+                adminSettings.password = newPass;
+                
+                db.ref('adminSettings').set(adminSettings)
+                    .then(() => {
+                        alert('เปลี่ยนรหัสผ่านแอดมินเรียบร้อยแล้ว!');
+                        // ล้างค่าในช่องกรอก
+                        document.getElementById('adm-old-pass').value = "";
+                        document.getElementById('adm-new-pass').value = "";
+                        document.getElementById('adm-confirm-pass').value = "";
+                    })
+                    .catch(err => {
+                        alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + err.message);
+                    });
+            }
+        }
+
+        async function updateAdminQRCode() {
+            const fileInput = document.getElementById('adm-qr-input');
+            if (!fileInput.files || !fileInput.files[0]) {
+                alert('กรุณาเลือกไฟล์รูปภาพ QR Code ก่อนครับ');
+                return;
+            }
+
+            if (confirm('คุณต้องการอัปเดตรูป QR Code สำหรับรับเงินใช่หรือไม่?')) {
+                try {
+                    const dataUrl = await readFileAsDataURL(fileInput.files[0]);
+                    
+                    // อัปเดตข้อมูลลง Firebase
+                    const db = firebase.database();
+                    adminSettings.qrCodeUrl = dataUrl;
+                    
+                    await db.ref('adminSettings').set(adminSettings);
+                    
+                    alert('อัปเดตรูป QR Code เรียบร้อยแล้ว!');
+                    document.getElementById('adm-qr-preview').src = dataUrl;
+                    fileInput.value = ""; // ล้างค่า input
+                } catch (err) {
+                    alert('เกิดข้อผิดพลาด: ' + err.message);
+                }
+            }
         }
 
         async function uploadTutorialVideo() {
@@ -2114,6 +2214,11 @@
             currentSelectedPrice = price;
             document.getElementById('pay-system-name').innerText = systemName;
             document.getElementById('pay-amount').innerText = '฿' + price + '.00';
+            
+            // อัปเดตรูป QR Code ให้เป็นปัจจุบัน
+            const qrImg = document.getElementById('payment-qr-img');
+            if (qrImg) qrImg.src = adminSettings.qrCodeUrl;
+            
             openModal('payment-modal');
         }
 
@@ -2211,14 +2316,24 @@
             var user = document.getElementById('admin-user').value.trim();
             var pass = document.getElementById('admin-pass').value.trim();
             
-            // เข้ารหัสข้อมูลที่กรอกเพื่อเปรียบเทียบกับค่าที่เข้ารหัสไว้
-            if (_e(user) === 'YWRtaW4=' && _e(pass) === 'YWRtaW4=') {
+            // ตรวจสอบกับข้อมูลใน Firebase (adminSettings)
+            // หมายเหตุ: ID แอดมินยังคงเป็น 'admin' แต่รหัสผ่านเปลี่ยนตามที่ตั้งค่า
+            if (user === 'admin' && pass === adminSettings.password) {
                 // เก็บสถานะการเข้าสู่ระบบไว้ใน localStorage (เข้ารหัสสถานะด้วย)
                 localStorage.setItem('isAdminLoggedIn', _e('true'));
                 
                 closeModal('admin-login-modal');
                 document.getElementById('admin-user').value = '';
                 document.getElementById('admin-pass').value = '';
+                
+                // ตรวจสอบว่ามีคำขออนุมัติค้างอยู่ใน URL หรือไม่
+                const urlParams = new URLSearchParams(window.location.search);
+                if (urlParams.get('action') === 'approve') {
+                    // รีโหลดหน้าเพื่อให้ Logic ใน window.onload ทำงานใหม่พร้อมสิทธิ์แอดมิน
+                    window.location.reload();
+                    return;
+                }
+
                 renderAdminTable();
                 openModal('admin-dashboard-modal');
                 switchAdminTab('add'); // Default tab
