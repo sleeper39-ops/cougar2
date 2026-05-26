@@ -409,7 +409,7 @@
             <p class="text-xs text-gray-400 mb-4">สแกนคิวอาร์โค้ดด้านล่างเพื่อชำระเงินผ่านแอปธนาคาร</p>
             
             <div class="bg-white p-4 rounded-xl inline-block shadow-inner mb-4 relative group">
-                <img src="https://lh3.googleusercontent.com/d/1_T0A-1GfV7-V4-Z-A-R-S-Z-V-X-L-V-X=w400-h400-iv1" alt="QR Code" class="w-44 h-44 mx-auto object-contain">
+                <img src="https://lh3.googleusercontent.com/d/1_T0A-1GfV7-V4-Z-A-R-S-Z-V-X-L-V-X" alt="QR Code" class="w-44 h-44 mx-auto object-contain">
                 <div class="absolute inset-0 bg-emerald-600/90 text-white flex flex-col items-center justify-center rounded-xl opacity-0 group-hover:opacity-100 transition-opacity p-2 text-center">
                     <i class="fa-solid fa-shield-check text-white text-xl mb-1"></i>
                     <p class="text-[10px] leading-relaxed font-bold">สแกนจ่ายเพื่อใช้งานจริง<br>รองรับทุกแอปธนาคาร<br>ระบบจะแจ้งเตือนอัตโนมัติ</p>
@@ -997,17 +997,29 @@
             db.ref('systems').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    // แปลง object เป็น array และเรียงลำดับใหม่ล่าสุดขึ้นก่อน
                     systemsDatabase = Object.values(data)
-                        .filter(sys => sys && sys.id) // กรองข้อมูลที่สมบูรณ์เท่านั้น
-                        .sort((a, b) => {
-                            return (b.id || "").localeCompare(a.id || "");
-                        });
+                        .filter(sys => sys && sys.id)
+                        .sort((a, b) => (b.id || "").localeCompare(a.id || ""));
                 }
-                // ถ้าไม่มี data ใน Firebase (null) จะยังคงใช้ systemsDatabase ตัวอย่างที่มีอยู่
                 renderCatalog();
                 renderAdminSystemsTable();
             });
+
+            // โหลดรายการชำระเงิน (สำหรับแอดมิน)
+            db.ref('payments').on('value', (snapshot) => {
+                const data = snapshot.val();
+                paymentDatabase = data ? Object.values(data).reverse() : [];
+                renderAdminTable();
+            });
+
+            // โหลดรายการที่ซื้อแล้วของ User ปัจจุบัน
+            if (currentUser) {
+                db.ref(`users/${currentUser.uid}/purchasedSystems`).on('value', (snapshot) => {
+                    const data = snapshot.val();
+                    purchasedSystems = data ? Object.keys(data) : [];
+                    renderCatalog();
+                });
+            }
 
             // โหลดเอกสาร
             db.ref('documents').on('value', (snapshot) => {
@@ -1021,7 +1033,6 @@
             db.ref('tutorialVideos').on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (data) {
-                    // กรองข้อมูลที่ไม่มี ID หรือ src เพื่อป้องกันข้อมูลผิดพลาด
                     tutorialVideosDatabase = Object.values(data).filter(v => v && v.id && v.src);
                 } else {
                     tutorialVideosDatabase = [];
@@ -1030,7 +1041,6 @@
                 renderVideosList();
                 renderAdminVideosTable();
                 
-                // แสดงวิดีโอแรกถ้ามี
                 if (tutorialVideosDatabase.length > 0) {
                     updateMainPlayer(tutorialVideosDatabase[0]);
                 } else {
@@ -1169,11 +1179,14 @@
                 if (user) {
                     currentUser = user;
                     updateAuthUI(true);
+                    // โหลดข้อมูลใหม่เพื่อให้เข้าถึงข้อมูลส่วนบุคคล (เช่น รายการที่ซื้อแล้ว)
+                    loadDataFromFirebase();
                 } else {
                     currentUser = null;
                     updateAuthUI(false);
+                    purchasedSystems = []; // ล้างรายการที่ซื้อเมื่อ Logout
+                    renderCatalog();
                 }
-                renderCatalog();
             });
         }
 
@@ -2052,7 +2065,12 @@
             openModal('payment-modal');
         }
 
-        function submitPaymentSim() {
+        async function submitPaymentSim() {
+            if (!currentUser) {
+                alert('กรุณาเข้าสู่ระบบก่อนชำระเงินครับ');
+                return;
+            }
+
             var now = new Date();
             var dateStr = now.toLocaleDateString('th-TH');
             var timeStr = now.toLocaleTimeString('th-TH');
@@ -2065,14 +2083,24 @@
                 price: currentSelectedPrice,
                 status: 'รอดำเนินการ',
                 buyerName: currentUser ? currentUser.displayName : 'Unknown',
-                buyerEmail: currentUser ? currentUser.email : 'Unknown'
+                buyerEmail: currentUser ? currentUser.email : 'Unknown',
+                buyerUid: currentUser ? currentUser.uid : 'Unknown'
             };
-            paymentDatabase.push(record);
             
-            // เพิ่มเข้ารายการที่ซื้อแล้ว (เฉพาะ ID ที่เลือกเท่านั้น)
-            if (currentSelectedSystemId && !purchasedSystems.includes(currentSelectedSystemId)) {
-                purchasedSystems.push(currentSelectedSystemId);
-                console.log("Purchased added:", currentSelectedSystemId);
+            // 1. บันทึกประวัติการซื้อลง Firebase (Global History สำหรับแอดมิน)
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                await firebase.database().ref('payments').push(record);
+                
+                // 2. บันทึกสิทธิ์การเข้าถึงโค้ดให้กับ User (Persistence)
+                if (currentSelectedSystemId) {
+                    await firebase.database().ref(`users/${currentUser.uid}/purchasedSystems/${currentSelectedSystemId}`).set(true);
+                }
+            } else {
+                // โหมด Demo (หน่วยความจำชั่วคราว)
+                paymentDatabase.push(record);
+                if (currentSelectedSystemId && !purchasedSystems.includes(currentSelectedSystemId)) {
+                    purchasedSystems.push(currentSelectedSystemId);
+                }
             }
             
             // ส่งแจ้งเตือนไปยัง Telegram
@@ -2086,10 +2114,10 @@
                 refId: record.id
             });
             
-            alert('จำลองการตรวจสอบยอดเงินสำเร็จ! แจ้งเตือน Telegram ถูกส่งเรียบร้อยแล้ว\n\nคุณสามารถกดปุ่ม "โหลดโค้ด" ที่หน้าหลักเพื่อดาวน์โหลดได้ทันทีครับ');
+            alert('ชำระเงินสำเร็จ! ข้อมูลถูกบันทึกลงระบบเรียบร้อยแล้ว\n\nคุณสามารถกดปุ่ม "โหลดโค้ด" ที่หน้าหลักเพื่อดาวน์โหลดได้ตลอดเวลา (แม้จะรีเฟรชหน้าเว็บ) ครับ');
             closeModal('payment-modal');
             renderAdminTable();
-            renderCatalog(); // รีเฟรชหน้าแคตตาล็อกเพื่อแสดงปุ่มโหลดโค้ด
+            renderCatalog(); 
 
             // ล้างค่าระบบที่เลือกหลังจากชำระเงินเสร็จ
             currentSelectedSystemId = "";
