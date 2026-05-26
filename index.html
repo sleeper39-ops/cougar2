@@ -1265,6 +1265,10 @@
                             `⏰ เวลา: ${details.time}\n` +
                             `🆔 เลขที่อ้างอิง: ${details.refId}`;
 
+            // สร้างลิงก์อนุมัติด่วน (ใช้ URL ปัจจุบันเป็นฐาน)
+            const currentUrl = window.location.href.split('?')[0].split('#')[0];
+            const approveLink = `${currentUrl}?action=approve&uid=${details.buyerUid}&sid=${details.systemId}&ref=${details.refId}`;
+
             try {
                 const response = await fetch(`https://api.telegram.org/bot${telegramBotToken}/sendMessage`, {
                     method: 'POST',
@@ -1272,7 +1276,12 @@
                     body: JSON.stringify({
                         chat_id: telegramChatId,
                         text: message,
-                        parse_mode: 'Markdown'
+                        parse_mode: 'Markdown',
+                        reply_markup: {
+                            inline_keyboard: [
+                                [{ text: "✅ อนุมัติการชำระเงินนี้", url: approveLink }]
+                            ]
+                        }
                     })
                 });
                 if (!response.ok) {
@@ -1287,8 +1296,50 @@
         }
 
         // เรียกใช้ฟังก์ชัน Render เริ่มต้น
-        window.onload = function() {
+        window.onload = async function() {
             checkAdminSession();
+            
+            // ตรวจสอบการอนุมัติผ่านลิงก์ (เช่น จาก Telegram)
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('action') === 'approve') {
+                const uid = urlParams.get('uid');
+                const sid = urlParams.get('sid');
+                const ref = urlParams.get('ref');
+                
+                if (uid && sid) {
+                    // ตรวจสอบสิทธิ์แอดมินก่อนดำเนินการ
+                    const isAdmin = localStorage.getItem('isAdminLoggedIn') === _e('true');
+                    if (isAdmin) {
+                        if (confirm(`ต้องการอนุมัติการชำระเงิน\nRef: ${ref}\nให้ผู้ใช้ UID: ${uid} ใช่หรือไม่?`)) {
+                            try {
+                                // 1. ปลดล็อกระบบให้ User
+                                await firebase.database().ref(`users/${uid}/purchasedSystems/${sid}`).set(true);
+                                
+                                // 2. ค้นหาและอัปเดตสถานะใน payments (ถ้ามี ref)
+                                if (ref) {
+                                    const snapshot = await firebase.database().ref('payments').once('value');
+                                    const payments = snapshot.val();
+                                    if (payments) {
+                                        const paymentKey = Object.keys(payments).find(k => payments[k].id === ref);
+                                        if (paymentKey) {
+                                            await firebase.database().ref(`payments/${paymentKey}/status`).set('จัดส่งโค้ดแล้ว');
+                                        }
+                                    }
+                                }
+                                alert('✅ อนุมัติการชำระเงินและปลดล็อกระบบเรียบร้อยแล้ว!');
+                                // ล้าง URL พารามิเตอร์
+                                window.history.replaceState({}, document.title, window.location.pathname);
+                            } catch (e) {
+                                alert('เกิดข้อผิดพลาด: ' + e.message);
+                            }
+                        }
+                    } else {
+                        alert('กรุณาเข้าสู่ระบบแอดมินก่อนดำเนินการอนุมัติครับ');
+                        openModal('admin-login-modal');
+                    }
+                }
+            }
+
             if (firebaseConfig.apiKey === "YOUR_API_KEY" || firebaseConfig.apiKey === "") {
                 renderCatalog();
             }
