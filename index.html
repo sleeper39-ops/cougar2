@@ -1317,7 +1317,7 @@
         async function sendTelegramNotification(details) {
             if (telegramBotToken === "YOUR_TELEGRAM_BOT_TOKEN") {
                 console.log("Telegram notification simulation:", details);
-                return;
+                return null;
             }
             
             const message = `🔔 *แจ้งเตือนการชำระเงินใหม่*\n\n` +
@@ -1327,7 +1327,8 @@
                             `💰 จำนวนเงิน: ฿${details.amount}.00\n` +
                             `📅 วันที่: ${details.date}\n` +
                             `⏰ เวลา: ${details.time}\n` +
-                            `🆔 เลขที่อ้างอิง: ${details.refId}`;
+                            `🆔 เลขที่อ้างอิง: ${details.refId}\n` +
+                            `📌 สถานะ: ⏳ รอดำเนินการ`;
 
             // สร้างลิงก์อนุมัติด่วน (ใช้ URL ปัจจุบันเป็นฐาน)
             const currentUrl = window.location.href.split('?')[0].split('#')[0];
@@ -1352,10 +1353,45 @@
                     const errData = await response.json();
                     throw new Error(errData.description || 'Unknown error');
                 }
+                const result = await response.json();
                 console.log("Telegram notification sent successfully!");
+                return result.result.message_id; // คืนค่า message_id เพื่อนำไปบันทึก
             } catch (error) {
                 console.error("Telegram Error:", error);
                 alert("แจ้งเตือน Telegram ล้มเหลว: " + error.message + "\n(กรุณาตรวจสอบ Bot Token และ Chat ID ในโค้ด)");
+                return null;
+            }
+        }
+
+        // ฟังก์ชันสำหรับอัปเดตข้อความใน Telegram
+        async function updateTelegramMessage(messageId, details) {
+            if (!messageId || telegramBotToken === "YOUR_TELEGRAM_BOT_TOKEN") return;
+
+            const message = `✅ *อนุมัติการชำระเงินสำเร็จ*\n\n` +
+                            `👤 ผู้ซื้อ: ${details.buyerName}\n` +
+                            `📧 อีเมล: ${details.buyerEmail}\n` +
+                            `💻 ระบบที่ซื้อ: ${details.systemName}\n` +
+                            `💰 จำนวนเงิน: ฿${details.amount}.00\n` +
+                            `📅 วันที่: ${details.date}\n` +
+                            `⏰ เวลา: ${details.time}\n` +
+                            `🆔 เลขที่อ้างอิง: ${details.refId}\n` +
+                            `📌 สถานะ: 🟢 อนุมัติสำเร็จแล้ว`;
+
+            try {
+                await fetch(`https://api.telegram.org/bot${telegramBotToken}/editMessageText`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: telegramChatId,
+                        message_id: messageId,
+                        text: message,
+                        parse_mode: 'Markdown',
+                        reply_markup: { inline_keyboard: [] } // ลบปุ่มออก
+                    })
+                });
+                console.log("Telegram message updated successfully!");
+            } catch (error) {
+                console.error("Telegram Update Error:", error);
             }
         }
 
@@ -1386,7 +1422,21 @@
                                     if (payments) {
                                         const paymentKey = Object.keys(payments).find(k => payments[k].id === ref);
                                         if (paymentKey) {
+                                            const pData = payments[paymentKey];
                                             await firebase.database().ref(`payments/${paymentKey}/status`).set('จัดส่งโค้ดแล้ว');
+                                            
+                                            // 3. อัปเดต Telegram
+                                            if (pData.telegramMsgId) {
+                                                updateTelegramMessage(pData.telegramMsgId, {
+                                                    buyerName: pData.buyerName,
+                                                    buyerEmail: pData.buyerEmail,
+                                                    systemName: pData.systemName,
+                                                    amount: pData.price,
+                                                    date: pData.timestamp.split(' ')[0],
+                                                    time: pData.timestamp.split(' ')[1],
+                                                    refId: pData.id
+                                                });
+                                            }
                                         }
                                     }
                                 }
@@ -2258,31 +2308,26 @@
                 buyerUid: currentUser ? currentUser.uid : 'Unknown'
             };
             
-            // 1. บันทึกประวัติการซื้อลง Firebase (สถานะ: รอดำเนินการ)
-            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
-                try {
-                    await firebase.database().ref('payments').push(record);
-                    alert('ส่งข้อมูลการชำระเงินเรียบร้อยแล้ว!\n\nกรุณารอแอดมินตรวจสอบยอดเงินสักครู่ครับ เมื่อแอดมินยืนยันแล้ว ปุ่ม "โหลดโค้ด" จะปรากฏขึ้นมาแทนที่ปุ่มสแกนจ่ายครับ');
-                } catch (e) {
-                    console.error("Firebase save error:", e);
-                    alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล: " + e.message);
-                }
-            } else {
-                // โหมด Demo
-                paymentDatabase.push(record);
-                alert('ส่งข้อมูลจำลองเรียบร้อยแล้ว (โหมด Demo)');
-            }
-            
-            // ส่งแจ้งเตือนไปยัง Telegram
-            sendTelegramNotification({
+            // ส่งแจ้งเตือนไปยัง Telegram และรับ message_id
+            const telegramMsgId = await sendTelegramNotification({
                 buyerName: record.buyerName,
                 buyerEmail: record.buyerEmail,
                 systemName: record.systemName,
                 amount: record.price,
                 date: dateStr,
                 time: timeStr,
-                refId: record.id
+                refId: record.id,
+                buyerUid: record.buyerUid,
+                systemId: record.systemId
             });
+
+            // 1. บันทึกประวัติการซื้อลง Firebase (สถานะ: รอดำเนินการ)
+            if (firebaseConfig.apiKey !== "YOUR_API_KEY") {
+                try {
+                    if (telegramMsgId) record.telegramMsgId = telegramMsgId; // เก็บ ID ข้อความไว้เพื่ออัปเดตภายหลัง
+                    await firebase.database().ref('payments').push(record);
+                    alert('ส่งข้อมูลการชำระเงินเรียบร้อยแล้ว!\n\nกรุณารอแอดมินตรวจสอบยอดเงินสักครู่ครับ เมื่อแอดมินยืนยันแล้ว ปุ่ม "โหลดโค้ด" จะปรากฏขึ้นมาแทนที่ปุ่มสแกนจ่ายครับ');
+                } catch (e) {
             
             closeModal('payment-modal');
             renderAdminTable();
@@ -2311,6 +2356,19 @@
                 // 2. ถ้าเปลี่ยนเป็น "จัดส่งโค้ดแล้ว" ให้ปลดล็อกระบบให้ User
                 if (newStatus === 'จัดส่งโค้ดแล้ว') {
                     await db.ref(`users/${buyerUid}/purchasedSystems/${systemId}`).set(true);
+                    
+                    // 3. อัปเดต Telegram
+                    if (paymentData.telegramMsgId) {
+                        updateTelegramMessage(paymentData.telegramMsgId, {
+                            buyerName: paymentData.buyerName,
+                            buyerEmail: paymentData.buyerEmail,
+                            systemName: paymentData.systemName,
+                            amount: paymentData.price,
+                            date: paymentData.timestamp.split(' ')[0],
+                            time: paymentData.timestamp.split(' ')[1],
+                            refId: paymentData.id
+                        });
+                    }
                 } else {
                     // ถ้าสลับกลับเป็นรอดำเนินการ ให้เอาสิทธิ์ออก (เผื่อแอดมินกดผิด)
                     await db.ref(`users/${buyerUid}/purchasedSystems/${systemId}`).remove();
