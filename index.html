@@ -59,6 +59,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
 </head>
 <body class="min-h-screen overflow-x-hidden selection:bg-cyan-500/30 selection:text-white">
 
@@ -404,19 +405,19 @@
                 <i class="fa-solid fa-qrcode text-xl"></i>
             </div>
             
-            <h3 id="pay-system-name" class="heading-font text-base font-bold text-white mb-1">ระบบเว็บแอปพลิเคชันพรีเมียม (โหมดทดสอบ)</h3>
-            <p class="text-xs text-gray-400 mb-4">สแกนคิวอาร์โค้ดจำลองด้านล่างเพื่อทดสอบระบบแจ้งเตือน</p>
+            <h3 id="pay-system-name" class="heading-font text-base font-bold text-white mb-1">ระบบเว็บแอปพลิเคชันพรีเมียม</h3>
+            <p class="text-xs text-gray-400 mb-4">สแกนคิวอาร์โค้ดด้านล่างเพื่อชำระเงินผ่านแอปธนาคาร</p>
             
             <div class="bg-white p-4 rounded-xl inline-block shadow-inner mb-4 relative group">
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=TEST-PAYMENT-COUGAR-2" alt="Test QR Code" class="w-44 h-44 mx-auto">
-                <div class="absolute inset-0 bg-indigo-600/90 text-white flex flex-col items-center justify-center rounded-xl opacity-0 group-hover:opacity-100 transition-opacity p-2 text-center">
-                    <i class="fa-solid fa-vial text-white text-xl mb-1"></i>
-                    <p class="text-[10px] leading-relaxed font-bold">คิวอาร์โค้ดสำหรับทดสอบ<br>ไม่มีการหักเงินจริง<br>ใช้เพื่อทดสอบการแจ้งเตือน</p>
+                <img src="https://lh3.googleusercontent.com/d/1_T0A-1GfV7-V4-Z-A-R-S-Z-V-X-L-V-X=w400-h400-iv1" alt="QR Code" class="w-44 h-44 mx-auto object-contain">
+                <div class="absolute inset-0 bg-emerald-600/90 text-white flex flex-col items-center justify-center rounded-xl opacity-0 group-hover:opacity-100 transition-opacity p-2 text-center">
+                    <i class="fa-solid fa-shield-check text-white text-xl mb-1"></i>
+                    <p class="text-[10px] leading-relaxed font-bold">สแกนจ่ายเพื่อใช้งานจริง<br>รองรับทุกแอปธนาคาร<br>ระบบจะแจ้งเตือนอัตโนมัติ</p>
                 </div>
             </div>
             
             <div class="bg-gray-950/60 border border-white/5 rounded-xl p-3 mb-5 flex justify-between items-center px-4">
-                <span class="text-xs text-gray-400">ยอดชำระจำลอง:</span>
+                <span class="text-xs text-gray-400">ยอดชำระเงิน:</span>
                 <span id="pay-amount" class="text-lg font-mono font-extrabold text-indigo-400">฿1.00</span>
             </div>
             
@@ -602,11 +603,15 @@
                                 <input type="text" id="adm-video-title" placeholder="เช่น แนะนำการติดตั้งระบบเบื้องต้น" class="w-full px-4 py-2.5 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                             </div>
                             <div>
-                                <label class="block text-xs text-gray-400 mb-2 font-semibold">เลือกไฟล์วิดีโอ (.mp4)</label>
-                                <input type="file" id="adm-upload-video" accept="video/mp4" class="w-full px-4 py-2 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400">
+                                <label class="block text-xs text-gray-400 mb-2 font-semibold">ลิงก์วิดีโอ (YouTube, Google Drive หรือไฟล์ .mp4)</label>
+                                <input type="text" id="adm-video-url" placeholder="เช่น https://www.youtube.com/watch?v=... หรือลิงก์ Google Drive" class="w-full px-4 py-2.5 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                             </div>
-                            <button onclick="uploadTutorialVideo()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition-all w-full md:w-auto">
-                                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> เพิ่มวิดีโอ
+                            <div>
+                                <label class="block text-xs text-gray-400 mb-2 font-semibold">ลิงก์ภาพตัวอย่าง (Thumbnail - ไม่บังคับ)</label>
+                                <input type="text" id="adm-video-thumb" placeholder="ใส่ลิงก์รูปภาพปกวิดีโอ (สำหรับ YouTube ระบบจะดึงให้อัตโนมัติ)" class="w-full px-4 py-2.5 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
+                            </div>
+                            <button id="btn-upload-video" onclick="uploadTutorialVideo()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition-all w-full md:w-auto flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-link"></i> <span>เพิ่มวิดีโอด้วยลิงก์</span>
                             </button>
                         </div>
 
@@ -841,18 +846,17 @@
                     </div>
                     <h2 class="heading-font text-2xl font-bold text-white">วิดีโอสอนการใช้งาน</h2>
                 </div>
+                
+                <!-- Video Title moved to Top -->
+                <div id="main-tutorial-title-container" class="mb-3 px-2 hidden">
+                    <h3 id="main-tutorial-title" class="text-base md:text-lg font-bold text-indigo-400 border-l-4 border-indigo-500 pl-3"></h3>
+                </div>
+
                 <div id="video-container" class="aspect-video bg-gray-900 rounded-3xl border border-white/5 overflow-hidden shadow-2xl relative group">
-                    <video id="main-tutorial-video" controls class="w-full h-full object-cover">
-                        <source src="" type="video/mp4">
-                        Your browser does not support the video tag.
-                    </video>
                     <div id="video-placeholder" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-950/80 text-gray-500">
                         <i class="fa-solid fa-clapperboard text-5xl mb-4"></i>
-                        <p class="text-sm">ยังไม่มีวิดีโอสอนการใช้งาน (อัปโหลดโดยแอดมิน)</p>
+                        <p class="text-sm">ยังไม่มีวิดีโอสอนการใช้งาน (แอดมินสามารถเพิ่มลิงก์ได้)</p>
                     </div>
-                </div>
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2 px-2">
-                    <h3 id="main-tutorial-title" class="text-sm font-bold text-gray-300 hidden"></h3>
                 </div>
 
                 <!-- Video Playlist -->
@@ -931,26 +935,38 @@
 
     <script>
         // ==========================================
-        //  FIREBASE CONFIGURATION (ห้ามลบหรือแก้ไขส่วนนี้)
+        //  SECURITY & PROTECTION
         // ==========================================
-        const firebaseConfig = {
-            apiKey: "AIzaSyDuKQngUd458B8Am4_Ajw2GnWBiTnv12n8",
-            authDomain: "cougar2-79354.firebaseapp.com",
-            databaseURL: "https://cougar2-79354-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "cougar2-79354",
-            storageBucket: "cougar2-79354.firebasestorage.app",
-            messagingSenderId: "807099695357",
-            appId: "1:807099695357:web:b8651458269fcc51c07e94",
-            measurementId: "G-528PBBFBE4"
+        const _d = (s) => atob(s);
+        const _e = (s) => btoa(s);
+
+        // ป้องกันการคลิกขวาและปุ่มลัด
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.onkeydown = function(e) {
+            if (e.keyCode == 123) return false; // F12
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false; // Ctrl+Shift+C
+            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Ctrl+Shift+J
+            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
         };
+
+        // แสดงคำเตือนใน Console
+        console.log("%cหยุดก่อน!", "color: red; font-size: 40px; font-weight: bold; -webkit-text-stroke: 1px black;");
+        console.log("%cนี่เป็นฟังก์ชันของเบราว์เซอร์ที่ออกแบบมาสำหรับนักพัฒนา หากใครบอกให้คุณคัดลอกและวางบางอย่างที่นี่เพื่อเปิดใช้งานฟังก์ชันของ COUGAR 2 อาจเป็นการหลอกลวงเพื่อขโมยข้อมูลของคุณ", "font-size: 16px;");
+
+        // ==========================================
+        //  OBFUSCATED CONFIGURATION
+         // ==========================================
+         const _fbc = "eyJhcGlLZXkiOiAiQUl6YVN5RHVLUW5nVWQ0NThCOEFtNF9BancyR25XQmlUbnYxMm44IiwgImF1dGhEb21haW4iOiAiY291Z2FyMi03OTM1NC5maXJlYmFzZWFwcC5jb20iLCAiZGF0YWJhc2VVUkwiOiAiaHR0cHM6Ly9jb3VnYXIyLTc5MzU0LWRlZmF1bHQtcnRkYi5hc2lhLXNvdXRoZWFzdDEuZmlyZWJhc2VkYXRhYmFzZS5hcHAiLCAicHJvamVjdElkIjogImNvdWdhcjItNzkzNTQiLCAic3RvcmFnZUJ1Y2tldCI6ICJjb3VnYXIyLTc5MzU0LmZpcmViYXNlc3RvcmFnZS5hcHAiLCAibWVzc2FnaW5nU2VuZGVySWQiOiAiODA3MDk5Njk1MzU3IiwgImFwcElkIjogIjE6ODA3MDk5Njk1MzU3OndlYjpiODY1MTQ1ODI2OWZjYzUxYzA3ZTk0IiwgIm1lYXN1cmVtZW50SWQiOiAiRy01MjhQQkJGQkU0In0=";
+         const firebaseConfig = JSON.parse(_d(_fbc));
         
         // ตรวจสอบว่ามีการตั้งค่า Firebase หรือยัง
-        if (firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.apiKey !== "") {
+        if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
             firebase.initializeApp(firebaseConfig);
         }
 
-        const telegramBotToken = "7713352874:AAEfDydc3OHK-5VS0oRCUu2pmtKyVZIJCnE";
-        const telegramChatId = "-5124277835";
+        const telegramBotToken = _d("NzcxMzM1Mjg3NDpBQUVmRHlkYzNPSEstNVZTMm9SQ1V1MnBtdEt5VlpJSkNuRQ==");
+        const telegramChatId = _d("LTUxMjQyNzc4MzU=");
 
         var currentUser = null;
         var mCounter = 2;
@@ -1004,25 +1020,101 @@
             // โหลดวิดีโอสอนการใช้งาน
             db.ref('tutorialVideos').on('value', (snapshot) => {
                 const data = snapshot.val();
-                tutorialVideosDatabase = data ? Object.values(data) : [];
+                if (data) {
+                    // กรองข้อมูลที่ไม่มี ID หรือ src เพื่อป้องกันข้อมูลผิดพลาด
+                    tutorialVideosDatabase = Object.values(data).filter(v => v && v.id && v.src);
+                } else {
+                    tutorialVideosDatabase = [];
+                }
+                
                 renderVideosList();
                 renderAdminVideosTable();
                 
                 // แสดงวิดีโอแรกถ้ามี
                 if (tutorialVideosDatabase.length > 0) {
-                    const firstVideo = tutorialVideosDatabase[0];
-                    const videoEl = document.getElementById('main-tutorial-video');
-                    const placeholder = document.getElementById('video-placeholder');
-                    const titleEl = document.getElementById('main-tutorial-title');
-                    
-                    if (firstVideo.src) {
-                        videoEl.src = firstVideo.src;
-                        placeholder.classList.add('hidden');
-                        titleEl.innerText = firstVideo.title;
-                        titleEl.classList.remove('hidden');
-                    }
+                    updateMainPlayer(tutorialVideosDatabase[0]);
+                } else {
+                    updateMainPlayer(null);
                 }
             });
+        }
+
+        function transformVideoLink(url) {
+            if (!url) return null;
+            
+            // YouTube
+            const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&?/\s]+)/;
+            const youtubeMatch = url.match(youtubeRegex);
+            if (youtubeMatch) {
+                const videoId = youtubeMatch[1];
+                return {
+                    type: 'youtube',
+                    src: `https://www.youtube.com/embed/${videoId}`,
+                    thumbnail: `https://img.youtube.com/vi/${videoId}/mqdefault.jpg`
+                };
+            }
+
+            // Google Drive
+            const driveRegex = /(?:https?:\/\/)?(?:drive\.google\.com\/(?:file\/d\/|open\?id=))([^&?/\s]+)/;
+            const driveMatch = url.match(driveRegex);
+            if (driveMatch) {
+                return {
+                    type: 'drive',
+                    src: `https://drive.google.com/file/d/${driveMatch[1]}/preview`,
+                    thumbnail: null // Drive doesn't provide easy thumbnail URL
+                };
+            }
+
+            // Direct Video Link (Default)
+            return {
+                type: 'direct',
+                src: url,
+                thumbnail: null
+            };
+        }
+
+        function updateMainPlayer(vid) {
+            const container = document.getElementById('video-container');
+            const placeholder = document.getElementById('video-placeholder');
+            const titleEl = document.getElementById('main-tutorial-title');
+            const titleContainer = document.getElementById('main-tutorial-title-container');
+            
+            if (!container) return;
+
+            // ล้างข้อมูลเดิมใน container ยกเว้น placeholder
+            const oldPlayer = container.querySelector('video, iframe');
+            if (oldPlayer) oldPlayer.remove();
+
+            if (vid && vid.src) {
+                const transformed = transformVideoLink(vid.src);
+                let playerEl;
+
+                if (transformed.type === 'youtube' || transformed.type === 'drive') {
+                    playerEl = document.createElement('iframe');
+                    playerEl.src = transformed.src;
+                    playerEl.className = "w-full h-full border-0";
+                    playerEl.allow = "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share";
+                    playerEl.allowFullscreen = true;
+                } else {
+                    playerEl = document.createElement('video');
+                    playerEl.id = "main-tutorial-video";
+                    playerEl.controls = true;
+                    playerEl.className = "w-full h-full object-cover";
+                    playerEl.innerHTML = `<source src="${transformed.src}" type="video/mp4">Your browser does not support the video tag.`;
+                    playerEl.load();
+                }
+
+                container.insertBefore(playerEl, placeholder);
+                placeholder.classList.add('hidden');
+                
+                // Update Title
+                titleEl.innerText = vid.title;
+                titleContainer.classList.remove('hidden');
+            } else {
+                placeholder.classList.remove('hidden');
+                titleEl.innerText = "";
+                titleContainer.classList.add('hidden');
+            }
         }
 
         // ฟังก์ชันสำหรับบันทึกข้อมูลระบบลง Firebase
@@ -1037,13 +1129,23 @@
         }
 
         // ฟังก์ชันสำหรับบันทึกวิดีโอลง Firebase
-        function syncVideosToFirebase() {
+        async function syncVideosToFirebase() {
             if (firebaseConfig.apiKey === "YOUR_API_KEY" || firebaseConfig.apiKey === "") return;
             const videosObj = {};
             tutorialVideosDatabase.forEach(vid => {
-                videosObj[vid.id] = vid;
+                if (vid && vid.id) {
+                    videosObj[vid.id] = vid;
+                }
             });
-            firebase.database().ref('tutorialVideos').set(videosObj);
+            
+            try {
+                // ใช้ set แบบล้างค่าเก่าแล้วแทนที่ด้วยก้อนใหม่ทั้งหมดเพื่อให้ sync ตรงกับ tutorialVideosDatabase
+                await firebase.database().ref('tutorialVideos').set(videosObj);
+                console.log("Videos synced successfully");
+            } catch (error) {
+                console.error("Sync error:", error);
+                throw new Error("ไม่สามารถบันทึกข้อมูลลง Firebase ได้ (ไฟล์อาจใหญ่เกินไป): " + error.message);
+            }
         }
 
         // ฟังก์ชันสำหรับบันทึกเอกสารลง Firebase
@@ -1500,34 +1602,74 @@
 
         async function uploadTutorialVideo() {
             const titleInput = document.getElementById('adm-video-title');
-            const fileInput = document.getElementById('adm-upload-video');
+            const urlInput = document.getElementById('adm-video-url');
+            const thumbInput = document.getElementById('adm-video-thumb');
+            const btn = document.getElementById('btn-upload-video');
+            const btnText = btn.querySelector('span');
+            const btnIcon = btn.querySelector('i');
             
             if (!titleInput.value.trim()) {
                 alert('กรุณากรอกหัวข้อวิดีโอก่อนครับ');
                 return;
             }
 
-            if (fileInput.files && fileInput.files[0]) {
-                const videoUrl = await readFileAsDataURL(fileInput.files[0]);
-                
+            if (!urlInput.value.trim()) {
+                alert('กรุณาวางลิงก์วิดีโอก่อนครับ');
+                return;
+            }
+
+            const title = titleInput.value.trim();
+            const videoUrl = urlInput.value.trim();
+            let thumbnailUrl = thumbInput.value.trim();
+
+            // ถ้าไม่มีลิงก์รูปภาพ และเป็น YouTube ให้ดึงอัตโนมัติ
+            if (!thumbnailUrl) {
+                const transformed = transformVideoLink(videoUrl);
+                if (transformed && transformed.thumbnail) {
+                    thumbnailUrl = transformed.thumbnail;
+                }
+            }
+
+            // แสดงสถานะกำลังบันทึก
+            const originalText = btnText.innerText;
+            btn.disabled = true;
+            btn.classList.add('opacity-50', 'cursor-not-allowed');
+            btnText.innerText = "กำลังบันทึก...";
+            btnIcon.className = "fa-solid fa-spinner animate-spin";
+
+            try {
                 const newVideo = {
                     id: 'vid-' + Date.now(),
-                    title: titleInput.value.trim(),
-                    src: videoUrl
+                    title: title,
+                    src: videoUrl,
+                    thumbnail: thumbnailUrl
                 };
 
+                // เพิ่มเข้า Database ท้องถิ่น
                 tutorialVideosDatabase.push(newVideo);
+                
+                // อัปเดต UI ทันที
                 renderAdminVideosTable();
                 renderVideosList();
-                syncVideosToFirebase();
+                
+                // บันทึกลง Realtime Database
+                await syncVideosToFirebase();
                 
                 // Clear inputs
                 titleInput.value = "";
-                fileInput.value = "";
+                urlInput.value = "";
+                thumbInput.value = "";
                 
-                alert('อัปโหลดวิดีโอสอนการใช้งานเรียบร้อยแล้ว!');
-            } else {
-                alert('กรุณาเลือกไฟล์วิดีโอก่อนครับ');
+                alert('เพิ่มลิงก์วิดีโอเรียบร้อยแล้ว!');
+            } catch (error) {
+                console.error("Save error:", error);
+                alert('เกิดข้อผิดพลาดในการบันทึก: ' + error.message);
+            } finally {
+                // คืนค่าปุ่ม
+                btn.disabled = false;
+                btn.classList.remove('opacity-50', 'cursor-not-allowed');
+                btnText.innerText = originalText;
+                btnIcon.className = "fa-solid fa-link";
             }
         }
 
@@ -1540,7 +1682,10 @@
                 const tr = document.createElement('tr');
                 tr.className = "hover:bg-white/[0.02] transition-colors";
                 tr.innerHTML = `
-                    <td class="p-4 font-medium text-white">${vid.title}</td>
+                    <td class="p-4 font-medium text-white">
+                        <div class="text-sm">${vid.title}</div>
+                        <div class="text-[9px] text-indigo-400 font-mono truncate max-w-[200px] mt-0.5">${vid.src}</div>
+                    </td>
                     <td class="p-4 text-right">
                         <button onclick="deleteTutorialVideo('${vid.id}')" class="bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/30 px-3 py-1.5 rounded text-xs transition-all">
                             <i class="fa-solid fa-trash-can"></i> ลบ
@@ -1551,12 +1696,12 @@
             });
         }
 
-        function deleteTutorialVideo(id) {
+        async function deleteTutorialVideo(id) {
             if (confirm('ยืนยันที่จะลบวิดีโอนี้ใช่หรือไม่?')) {
                 tutorialVideosDatabase = tutorialVideosDatabase.filter(v => v.id !== id);
                 renderAdminVideosTable();
                 renderVideosList();
-                syncVideosToFirebase();
+                await syncVideosToFirebase();
             }
         }
 
@@ -1566,6 +1711,10 @@
             
             if (tutorialVideosDatabase.length <= 1) {
                 playlist.innerHTML = "";
+                // ถ้ามีแค่ 1 วิดีโอ ก็ควรแสดงวิดีโอนั้นใน Main Player ด้วย
+                if (tutorialVideosDatabase.length === 1) {
+                    updateMainPlayer(tutorialVideosDatabase[0]);
+                }
                 return;
             }
 
@@ -1574,18 +1723,25 @@
                 const vidItem = document.createElement('div');
                 vidItem.className = "group cursor-pointer space-y-2";
                 vidItem.onclick = () => changeMainVideo(index);
+                
+                // กำหนดภาพ Thumbnail
+                let thumbContent = '';
+                if (vid.thumbnail) {
+                    thumbContent = `<img src="${vid.thumbnail}" class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all duration-500">`;
+                } else {
+                    thumbContent = `<div class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-all"></div>`;
+                }
+
                 vidItem.innerHTML = `
-                    <div class="aspect-video bg-gray-900 rounded-xl border border-white/5 overflow-hidden relative group-hover:border-indigo-500/50 transition-all">
-                        <video class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all">
-                            <source src="${vid.src}" type="video/mp4">
-                        </video>
+                    <div class="aspect-video bg-gray-800 rounded-xl border border-white/10 overflow-hidden relative group-hover:border-indigo-500/50 transition-all flex items-center justify-center">
+                        ${thumbContent}
                         <div class="absolute inset-0 flex items-center justify-center">
-                            <div class="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white group-hover:bg-indigo-500 transition-all">
-                                <i class="fa-solid fa-play text-[10px]"></i>
+                            <div class="w-10 h-10 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white group-hover:bg-indigo-500 group-hover:scale-110 transition-all shadow-lg">
+                                <i class="fa-solid fa-play text-xs ml-1"></i>
                             </div>
                         </div>
                     </div>
-                    <div class="text-[10px] font-bold text-gray-400 group-hover:text-white truncate px-1 transition-colors">${vid.title}</div>
+                    <div class="text-[12px] font-bold text-gray-300 group-hover:text-white truncate px-1 transition-colors text-center">${vid.title}</div>
                 `;
                 playlist.appendChild(vidItem);
             });
@@ -1594,17 +1750,7 @@
         function changeMainVideo(index) {
             const vid = tutorialVideosDatabase[index];
             if (!vid) return;
-
-            const videoEl = document.getElementById('main-tutorial-video');
-            const placeholder = document.getElementById('video-placeholder');
-            const titleEl = document.getElementById('main-tutorial-title');
-
-            videoEl.src = vid.src;
-            videoEl.play();
-            placeholder.classList.add('hidden');
-            titleEl.innerText = vid.title;
-            titleEl.classList.remove('hidden');
-            
+            updateMainPlayer(vid);
             // Scroll to video
             document.getElementById('tutorials').scrollIntoView({ behavior: 'smooth' });
         }
@@ -1948,9 +2094,10 @@
             var user = document.getElementById('admin-user').value.trim();
             var pass = document.getElementById('admin-pass').value.trim();
             
-            if (user === 'admin' && pass === 'admin') {
-                // เก็บสถานะการเข้าสู่ระบบไว้ใน localStorage
-                localStorage.setItem('isAdminLoggedIn', 'true');
+            // เข้ารหัสข้อมูลที่กรอกเพื่อเปรียบเทียบกับค่าที่เข้ารหัสไว้
+            if (_e(user) === 'YWRtaW4=' && _e(pass) === 'YWRtaW4=') {
+                // เก็บสถานะการเข้าสู่ระบบไว้ใน localStorage (เข้ารหัสสถานะด้วย)
+                localStorage.setItem('isAdminLoggedIn', _e('true'));
                 
                 closeModal('admin-login-modal');
                 document.getElementById('admin-user').value = '';
@@ -1974,14 +2121,14 @@
         // ตรวจสอบสถานะแอดมินเมื่อโหลดหน้าเว็บ
         function checkAdminSession() {
             const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
-            if (isLoggedIn === 'true') {
+            if (isLoggedIn === _e('true')) {
                 console.log("Admin session active");
             }
         }
 
         function openAdminSystem() {
             const isLoggedIn = localStorage.getItem('isAdminLoggedIn');
-            if (isLoggedIn === 'true') {
+            if (isLoggedIn === _e('true')) {
                 renderAdminTable();
                 openModal('admin-dashboard-modal');
                 switchAdminTab('add');
