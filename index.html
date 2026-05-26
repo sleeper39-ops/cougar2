@@ -596,7 +596,7 @@
                             <i class="fa-solid fa-video text-indigo-400"></i>
                             <h4 class="text-sm font-bold text-white uppercase tracking-wider">อัปโหลดวิดีโอสอนการใช้งาน</h4>
                         </div>
-                        <div class="space-y-4">
+                        <div class="space-y-4 mb-8">
                             <div>
                                 <label class="block text-xs text-gray-400 mb-2 font-semibold">หัวข้อวิดีโอ</label>
                                 <input type="text" id="adm-video-title" placeholder="เช่น แนะนำการติดตั้งระบบเบื้องต้น" class="w-full px-4 py-2.5 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
@@ -605,9 +605,24 @@
                                 <label class="block text-xs text-gray-400 mb-2 font-semibold">เลือกไฟล์วิดีโอ (.mp4)</label>
                                 <input type="file" id="adm-upload-video" accept="video/mp4" class="w-full px-4 py-2 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400">
                             </div>
-                            <button onclick="uploadTutorialVideo()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition-all">
-                                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> อัปโหลดและแสดงที่หน้าแรก
+                            <button onclick="uploadTutorialVideo()" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold px-6 py-2.5 rounded-xl transition-all w-full md:w-auto">
+                                <i class="fa-solid fa-cloud-arrow-up mr-1"></i> เพิ่มวิดีโอ
                             </button>
+                        </div>
+
+                        <!-- Video List Table -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-white/5 text-gray-400 uppercase text-[10px] font-bold border-b border-white/5">
+                                    <tr>
+                                        <th class="p-4">หัวข้อวิดีโอ</th>
+                                        <th class="p-4 text-right">การจัดการ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-video-rows" class="divide-y divide-white/5">
+                                    <!-- Dynamic rows here -->
+                                </tbody>
+                            </table>
                         </div>
                     </div>
 
@@ -836,7 +851,14 @@
                         <p class="text-sm">ยังไม่มีวิดีโอสอนการใช้งาน (อัปโหลดโดยแอดมิน)</p>
                     </div>
                 </div>
-                <h3 id="main-tutorial-title" class="text-sm font-bold text-gray-300 mt-2 px-2 hidden"></h3>
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-2 px-2">
+                    <h3 id="main-tutorial-title" class="text-sm font-bold text-gray-300 hidden"></h3>
+                </div>
+
+                <!-- Video Playlist -->
+                <div id="video-playlist" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
+                    <!-- Rendered by JS -->
+                </div>
             </div>
 
             <!-- Documentation Download Section -->
@@ -935,8 +957,7 @@
         var currentPage = 1;
         const itemsPerPage = 6;
         var documentsDatabase = []; // เก็บข้อมูลเอกสาร
-        var tutorialVideoSrc = ""; // เก็บ Source วิดีโอสอนการใช้งาน
-        var tutorialVideoTitle = ""; // เก็บหัวข้อวิดีโอสอนการใช้งาน
+        var tutorialVideosDatabase = []; // เก็บข้อมูลวิดีโอทั้งหมด
         var currentSelectedSystemId = ""; // เพิ่มการเก็บ ID ระบบที่เลือก
         var currentSandboxBlobUrl = null; // เก็บ Blob URL ของ Sandbox ปัจจุบัน
         var currentSelectedSystem = "";
@@ -981,20 +1002,23 @@
             });
 
             // โหลดวิดีโอสอนการใช้งาน
-            db.ref('tutorialVideo').on('value', (snapshot) => {
+            db.ref('tutorialVideos').on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (data) {
-                    tutorialVideoSrc = data.src;
-                    tutorialVideoTitle = data.title;
-                    
+                tutorialVideosDatabase = data ? Object.values(data) : [];
+                renderVideosList();
+                renderAdminVideosTable();
+                
+                // แสดงวิดีโอแรกถ้ามี
+                if (tutorialVideosDatabase.length > 0) {
+                    const firstVideo = tutorialVideosDatabase[0];
                     const videoEl = document.getElementById('main-tutorial-video');
                     const placeholder = document.getElementById('video-placeholder');
                     const titleEl = document.getElementById('main-tutorial-title');
                     
-                    if (tutorialVideoSrc) {
-                        videoEl.src = tutorialVideoSrc;
+                    if (firstVideo.src) {
+                        videoEl.src = firstVideo.src;
                         placeholder.classList.add('hidden');
-                        titleEl.innerText = tutorialVideoTitle;
+                        titleEl.innerText = firstVideo.title;
                         titleEl.classList.remove('hidden');
                     }
                 }
@@ -1010,6 +1034,16 @@
                 systemsObj[sys.id] = sys;
             });
             firebase.database().ref('systems').set(systemsObj);
+        }
+
+        // ฟังก์ชันสำหรับบันทึกวิดีโอลง Firebase
+        function syncVideosToFirebase() {
+            if (firebaseConfig.apiKey === "YOUR_API_KEY" || firebaseConfig.apiKey === "") return;
+            const videosObj = {};
+            tutorialVideosDatabase.forEach(vid => {
+                videosObj[vid.id] = vid;
+            });
+            firebase.database().ref('tutorialVideos').set(videosObj);
         }
 
         // ฟังก์ชันสำหรับบันทึกเอกสารลง Firebase
@@ -1424,7 +1458,10 @@
             }
             
             if (tab === 'manage') renderAdminSystemsTable();
-            if (tab === 'media') renderAdminDocsTable();
+            if (tab === 'media') {
+                renderAdminDocsTable();
+                renderAdminVideosTable();
+            }
         }
 
         function changeAdminPassword() {
@@ -1472,27 +1509,17 @@
 
             if (fileInput.files && fileInput.files[0]) {
                 const videoUrl = await readFileAsDataURL(fileInput.files[0]);
-                tutorialVideoSrc = videoUrl;
-                tutorialVideoTitle = titleInput.value.trim();
                 
-                // อัปเดต UI หน้าแรก
-                const videoEl = document.getElementById('main-tutorial-video');
-                const placeholder = document.getElementById('video-placeholder');
-                const titleEl = document.getElementById('main-tutorial-title');
-                
-                videoEl.src = videoUrl;
-                placeholder.classList.add('hidden');
-                
-                titleEl.innerText = tutorialVideoTitle;
-                titleEl.classList.remove('hidden');
-                
-                // บันทึกวิดีโอลง Firebase
-                if (firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.apiKey !== "") {
-                    firebase.database().ref('tutorialVideo').set({
-                        src: tutorialVideoSrc,
-                        title: tutorialVideoTitle
-                    });
-                }
+                const newVideo = {
+                    id: 'vid-' + Date.now(),
+                    title: titleInput.value.trim(),
+                    src: videoUrl
+                };
+
+                tutorialVideosDatabase.push(newVideo);
+                renderAdminVideosTable();
+                renderVideosList();
+                syncVideosToFirebase();
                 
                 // Clear inputs
                 titleInput.value = "";
@@ -1502,6 +1529,84 @@
             } else {
                 alert('กรุณาเลือกไฟล์วิดีโอก่อนครับ');
             }
+        }
+
+        function renderAdminVideosTable() {
+            const tbody = document.getElementById('admin-video-rows');
+            if (!tbody) return;
+            tbody.innerHTML = "";
+            
+            tutorialVideosDatabase.forEach((vid, index) => {
+                const tr = document.createElement('tr');
+                tr.className = "hover:bg-white/[0.02] transition-colors";
+                tr.innerHTML = `
+                    <td class="p-4 font-medium text-white">${vid.title}</td>
+                    <td class="p-4 text-right">
+                        <button onclick="deleteTutorialVideo('${vid.id}')" class="bg-red-600/20 hover:bg-red-600/40 text-red-300 border border-red-500/30 px-3 py-1.5 rounded text-xs transition-all">
+                            <i class="fa-solid fa-trash-can"></i> ลบ
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function deleteTutorialVideo(id) {
+            if (confirm('ยืนยันที่จะลบวิดีโอนี้ใช่หรือไม่?')) {
+                tutorialVideosDatabase = tutorialVideosDatabase.filter(v => v.id !== id);
+                renderAdminVideosTable();
+                renderVideosList();
+                syncVideosToFirebase();
+            }
+        }
+
+        function renderVideosList() {
+            const playlist = document.getElementById('video-playlist');
+            if (!playlist) return;
+            
+            if (tutorialVideosDatabase.length <= 1) {
+                playlist.innerHTML = "";
+                return;
+            }
+
+            playlist.innerHTML = "";
+            tutorialVideosDatabase.forEach((vid, index) => {
+                const vidItem = document.createElement('div');
+                vidItem.className = "group cursor-pointer space-y-2";
+                vidItem.onclick = () => changeMainVideo(index);
+                vidItem.innerHTML = `
+                    <div class="aspect-video bg-gray-900 rounded-xl border border-white/5 overflow-hidden relative group-hover:border-indigo-500/50 transition-all">
+                        <video class="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-all">
+                            <source src="${vid.src}" type="video/mp4">
+                        </video>
+                        <div class="absolute inset-0 flex items-center justify-center">
+                            <div class="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white group-hover:bg-indigo-500 transition-all">
+                                <i class="fa-solid fa-play text-[10px]"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-[10px] font-bold text-gray-400 group-hover:text-white truncate px-1 transition-colors">${vid.title}</div>
+                `;
+                playlist.appendChild(vidItem);
+            });
+        }
+
+        function changeMainVideo(index) {
+            const vid = tutorialVideosDatabase[index];
+            if (!vid) return;
+
+            const videoEl = document.getElementById('main-tutorial-video');
+            const placeholder = document.getElementById('video-placeholder');
+            const titleEl = document.getElementById('main-tutorial-title');
+
+            videoEl.src = vid.src;
+            videoEl.play();
+            placeholder.classList.add('hidden');
+            titleEl.innerText = vid.title;
+            titleEl.classList.remove('hidden');
+            
+            // Scroll to video
+            document.getElementById('tutorials').scrollIntoView({ behavior: 'smooth' });
         }
 
         async function addDocument() {
