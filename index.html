@@ -428,6 +428,19 @@
         </div>
     </div>
 
+    <div id="success-notification-modal" class="fixed inset-0 z-[70] bg-black/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-cardBg border border-white/10 rounded-2xl max-w-sm w-full p-8 relative shadow-2xl text-center">
+            <div class="w-20 h-20 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-4 border border-emerald-500/30">
+                <i class="fa-solid fa-check-circle text-4xl"></i>
+            </div>
+            <h3 id="success-title" class="heading-font text-lg font-bold text-white mb-2">ดำเนินการสำเร็จ!</h3>
+            <p id="success-message" class="text-xs text-gray-400 mb-6">รายการของคุณถูกบันทึกเรียบร้อยแล้ว</p>
+            <button onclick="closeModal('success-notification-modal')" class="w-full btn-gradient text-white text-xs font-bold py-3 rounded-xl transition-all shadow-md shadow-indigo-500/20">
+                ตกลง
+            </button>
+        </div>
+    </div>
+
     <div id="admin-login-modal" class="fixed inset-0 z-50 bg-black/75 backdrop-blur-sm hidden items-center justify-center p-4">
         <div class="bg-cardBg border border-white/10 rounded-2xl max-w-sm w-full p-8 relative shadow-2xl">
             <button onclick="closeModal('admin-login-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
@@ -766,7 +779,7 @@
     </div>
 
     <div id="edit-system-modal" class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-md hidden items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-cardBg border border-white/10 rounded-2xl max-w-2xl w-full p-8 relative shadow-2xl">
+        <div class="bg-cardBg border border-white/10 rounded-2xl max-w-2xl w-full p-8 relative shadow-2xl my-8 max-h-[90vh] overflow-y-auto">
             <button onclick="closeModal('edit-system-modal')" class="absolute top-4 right-4 text-gray-400 hover:text-white transition-colors"><i class="fa-solid fa-xmark text-lg"></i></button>
             <div class="flex items-center gap-2 mb-6 border-b border-white/5 pb-4">
                 <i class="fa-solid fa-pen-to-square text-indigo-400 text-xl"></i>
@@ -2402,6 +2415,12 @@
                     }
                 }
             }
+        }
+
+        function showSuccessNotification(title, message) {
+            document.getElementById('success-title').innerText = title;
+            document.getElementById('success-message').innerText = message;
+            openModal('success-notification-modal');
         }
         function openInnerModal() { openModal('inner-entry-modal'); }
         function closeInnerModal() {
