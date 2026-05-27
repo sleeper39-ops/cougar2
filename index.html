@@ -535,7 +535,7 @@
                                 <input type="number" id="add-sys-price" value="1" min="1" class="w-full px-4 py-2.5 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                             </div>
                             <div>
-                                <label class="block text-xs text-gray-400 mb-1.5 font-semibold">อัปโหลดรูปภาพประกอบ (สูงสุด 4 รูป)</label>
+                                <label class="block text-xs text-gray-400 mb-1.5 font-semibold">อัปโหลดรูปภาพประกอบ (สูงสุด 10 รูป)</label>
                                 <input type="file" id="add-sys-images" accept="image/*" multiple class="w-full px-4 py-2 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
                                 <p class="text-[9px] text-gray-500 mt-1">* รูปแรกจะใช้เป็นรูปหน้าปก</p>
                             </div>
@@ -753,34 +753,6 @@
                         </div>
                     </div>
                 </div>
-            </div>    <div id="admin-section-history" class="hidden space-y-4">
-                    <div class="bg-gray-950 border border-white/5 rounded-xl overflow-hidden">
-                        <div class="p-5 border-b border-white/5 bg-gray-900/30 flex justify-between items-center">
-                            <span class="text-sm font-bold text-white"><i class="fa-solid fa-receipt text-indigo-400 mr-2"></i> ประวัติรายการคำสั่งซื้อและการเงิน</span>
-                            <span class="text-xs bg-white/5 px-3 py-1 rounded text-gray-400">Sandbox Log</span>
-                        </div>
-                        
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left text-sm">
-                                <thead class="bg-white/5 text-gray-400 uppercase text-xs font-bold border-b border-white/5">
-                                    <tr>
-                                        <th class="p-4">วัน-เวลา</th>
-                                        <th class="p-4">ผู้ซื้อ</th>
-                                        <th class="p-4">ระบบเว็บแอปพลิเคชัน</th>
-                                        <th class="p-4">จำนวนเงิน</th>
-                                        <th class="p-4">สถานะจัดส่งโค้ด</th>
-                                        <th class="p-4 text-right">การจัดการ</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="admin-payment-rows" class="divide-y divide-white/5">
-                                    <tr id="no-data-row">
-                                        <td colspan="6" class="p-10 text-center text-gray-500 text-sm">ยังไม่มีรายการชำระเงินเข้ามาในระบบ ณ ขณะนี้ (เปิดอยู่บนหน่วยความจำจำลอง)</td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -810,7 +782,7 @@
                     <input type="number" id="edit-sys-price" min="1" class="w-full px-4 py-2.5 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold">อัปโหลดรูปภาพประกอบใหม่ (สูงสุด 4 รูป)</label>
+                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold">อัปโหลดรูปภาพประกอบใหม่ (สูงสุด 10 รูป)</label>
                     <input type="file" id="edit-sys-images" accept="image/*" multiple class="w-full px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
                     <p class="text-[10px] text-gray-500 mt-1">* เว้นว่างไว้หากไม่ต้องการเปลี่ยนรูปภาพเดิม</p>
                 </div>
@@ -988,15 +960,37 @@
         const _d = (s) => atob(s);
         const _e = (s) => btoa(s);
 
-        // ป้องกันการคลิกขวาและปุ่มลัด
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.onkeydown = function(e) {
-            if (e.keyCode == 123) return false; // F12
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false; // Ctrl+Shift+C
-            if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Ctrl+Shift+J
-            if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
-        };
+        // ป้องกันการคลิกขวา
+        document.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false;
+        });
+
+        // ป้องกันการกดปุ่มลัดสำหรับ DevTools
+        document.addEventListener('keydown', (e) => {
+            // F12
+            if (e.key === 'F12') {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+Shift+I / Ctrl+Shift+J / Ctrl+Shift+C
+            if (e.ctrlKey && e.shiftKey && ['I', 'J', 'C', 'i', 'j', 'c'].includes(e.key)) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+U (View Source)
+            if (e.ctrlKey && ['U', 'u'].includes(e.key)) {
+                e.preventDefault();
+                return false;
+            }
+            // Ctrl+S (Save Page)
+            if (e.ctrlKey && ['S', 's'].includes(e.key)) {
+                e.preventDefault();
+                return false;
+            }
+        });
+
+        // ตรวจสอบ DevTools (disabled for main page - use only in sandbox)
 
         // แสดงคำเตือนใน Console
         console.log("%cหยุดก่อน!", "color: red; font-size: 40px; font-weight: bold; -webkit-text-stroke: 1px black;");
@@ -1568,14 +1562,39 @@
                     iframe.removeAttribute('srcdoc');
                     iframe.src = finalUrl;
                 } else {
-                    // ฉีดสคริปต์ล้าง Storage เพื่อให้เป็น Sandbox ที่แท้จริง (คืนค่าเดิมทุกครั้งที่เปิด)
+                    // ฉีดสคริปต์ล้าง Storage และเพิ่มการป้องกัน
                     const resetScript = `<script>
                         (function() {
+                            // Clear storage
                             try {
                                 localStorage.clear();
                                 sessionStorage.clear();
                                 console.log("Sandbox Storage Cleared");
                             } catch(e) { console.error("Sandbox reset error:", e); }
+                            
+                            // Prevent right-click
+                            document.addEventListener('contextmenu', (e) => {
+                                e.preventDefault();
+                                return false;
+                            });
+                            
+                            // Prevent devtools shortcuts
+                            document.addEventListener('keydown', (e) => {
+                                if (e.key === 'F12') { e.preventDefault(); return false; }
+                                if (e.ctrlKey && e.shiftKey && ['I','J','C','i','j','c'].includes(e.key)) { e.preventDefault(); return false; }
+                                if (e.ctrlKey && ['U','u','S','s'].includes(e.key)) { e.preventDefault(); return false; }
+                            });
+                            
+                            // Devtools detection
+                            const checkDevTools = function() {
+                                const startTime = new Date();
+                                debugger;
+                                const endTime = new Date();
+                                if (endTime - startTime > 100) {
+                                    document.body.innerHTML = '<div style=\"display:flex;justify-content:center;align-items:center;height:100vh;background:#0b0f19;color:#ef4444;font-family:Sarabun,sans-serif;font-size:24px;text-align:center;\"><div><i class=\"fa-solid fa-triangle-exclamation\" style=\"font-size:64px;margin-bottom:20px;display:block;\"></i> กรุณาปิด Dev Tools เพื่อใช้งาน</div></div>';
+                                }
+                            };
+                            setInterval(checkDevTools, 1000);
                         })();
                     <\/script>`;
 
@@ -2228,7 +2247,7 @@
 
             if (fileInput.files && fileInput.files.length > 0) {
                 newImageUrls = [];
-                const count = Math.min(fileInput.files.length, 4);
+                const count = Math.min(fileInput.files.length, 10);
                 for (let i = 0; i < count; i++) {
                     newImageUrls.push(await readFileAsDataURL(fileInput.files[i]));
                 }
@@ -2613,7 +2632,7 @@
 
             var imageUrls = [];
             if (fileInput.files && fileInput.files.length > 0) {
-                const count = Math.min(fileInput.files.length, 4);
+                const count = Math.min(fileInput.files.length, 10);
                 for (let i = 0; i < count; i++) {
                     imageUrls.push(await readFileAsDataURL(fileInput.files[i]));
                 }
