@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CCTV Live</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <style>
+        body { font-family: 'Sarabun', sans-serif; }
+        .video-player { width: 100%; height: 100%; object-fit: cover; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen">
+    <header class="bg-slate-800 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <h1 class="text-2xl font-bold flex items-center gap-2">
+                <i class="fa-solid fa-video"></i> CCTV Live
+            </h1>
+            <button onclick="toggleAddForm()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
+                <i class="fa-solid fa-plus"></i> เพิ่มกล้อง
+            </button>
+        </div>
+    </header>
+
+    <!-- Add Camera Form -->
+    <div id="add-camera-form" class="max-w-2xl mx-auto p-4 hidden">
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-camera text-indigo-600"></i> เพิ่มกล้องใหม่
+            </h2>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ชื่อกล้อง</label>
+                    <input type="text" id="new-camera-name" placeholder="เช่น แยกกรมหลวง" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ลิงก์ .m3u8</label>
+                    <input type="text" id="new-camera-url" placeholder="https://..." class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div class="flex gap-3">
+                    <button onclick="saveNewCamera()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-lg font-semibold transition-colors">
+                        บันทึก
+                    </button>
+                    <button onclick="toggleAddForm()" class="flex-1 bg-slate-300 hover:bg-slate-400 text-slate-800 py-2 rounded-lg font-semibold transition-colors">
+                        ยกเลิก
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Video Grid -->
+    <main class="max-w-7xl mx-auto p-4">
+        <div id="video-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Cameras will be rendered here -->
+        </div>
+    </main>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        // Default cameras as fallback
+        const defaultCameras = [
+            { id: 'v1', name: 'แยกกรมหลวง', url: 'https://streaming.udoncity.go.th:1935/live/cctv_121.stream/chunklist_w2010918290.m3u8' },
+            { id: 'v2', name: 'แยกซอยจินตคาม', url: 'https://streaming.udoncity.go.th:1935/live/cctv_a740.stream/chunklist_w628809257.m3u8' },
+            { id: 'v3', name: 'แยกปั้ม ปตท. ไฮเทค', url: 'https://streaming.udoncity.go.th:1935/live/cctv_t191146.stream/chunklist_w1181163501.m3u8' },
+            { id: 'v4', name: 'แยกกองบิน (2)', url: 'https://streaming.udoncity.go.th:1935/live/cctv_t191149.stream/chunklist_w1308396059.m3u8' },
+            { id: 'v5', name: 'แยกกองบิน (1)', url: 'https://streaming.udoncity.go.th:1935/live/cctv_t191150.stream/chunklist_w1176991256.m3u8' },
+            { id: 'v6', name: 'มทบ.24 (1)', url: 'https://streaming.udoncity.go.th:1935/live/cctv_t191151.stream/chunklist_w1926802290.m3u8' },
+            { id: 'v7', name: 'แยกร่วมทวี', url: 'https://streaming.udoncity.go.th:1935/live/Axis_12_22.stream/chunklist_w236554495.m3u8' },
+            { id: 'v8', name: 'แยกเซ็นทรัล', url: 'https://streaming.udoncity.go.th:1935/live/Axis_12_38.stream/chunklist_w1610502304.m3u8' },
+            { id: 'v9', name: 'แยกสถานีรถไฟ', url: 'https://streaming.udoncity.go.th:1935/live/Axis_12_33.stream/chunklist_w34733218.m3u8' },
+            { id: 'v10', name: 'แยก รร หมากแข้ง', url: 'https://streaming.udoncity.go.th:1935/live/cctv_t192101.stream/chunklist_w836692422.m3u8' },
+            { id: 'v11', name: 'แยกเรือนจำ', url: 'https://streaming.udoncity.go.th:1935/live/Axis_IP729.stream/chunklist_w1495648512.m3u8' },
+            { id: 'v12', name: 'แยก รร อุดรพิทยานุกูล', url: 'https://streaming.udoncity.go.th:1935/live/Axis_IP727.stream/chunklist_w1204838826.m3u8' },
+            { id: 'v13', name: 'แยกอาชีวะศึกษา ด้านถนนเพาะนิยม', url: 'https://streaming.udoncity.go.th:1935/live/Axis_IP724.stream/chunklist_w741016741.m3u8' },
+            { id: 'v14', name: 'แยกอาชีวศึกษา ด้านถนนประชารักษา', url: 'https://streaming.udoncity.go.th:1935/live/Axis_7.21.stream/chunklist_w1836293394.m3u8' },
+            { id: 'v15', name: 'แยกคอกม้า', url: 'https://streaming.udoncity.go.th:1935/live/Axis_12_52.stream/chunklist_w573818671.m3u8' },
+            { id: 'v16', name: 'แยกสนามกีฬาเวสุวรรณ', url: 'https://streaming.udoncity.go.th:1935/live/Bosch_IP2.30.stream/chunklist_w828303139.m3u8' },
+            { id: 'v17', name: 'จุดกลับรถหน้าตลาดเมืองทอง', url: 'https://streaming.udoncity.go.th:1935/live/Axis_12_30.stream/chunklist_w467067745.m3u8' }
+        ];
+
+        // Load cameras from localStorage or use defaults
+        let cameras = JSON.parse(localStorage.getItem('cctvCameras')) || defaultCameras;
+        if (cameras.length === 0) cameras = defaultCameras;
+
+        function saveCameras() {
+            localStorage.setItem('cctvCameras', JSON.stringify(cameras));
+        }
+
+        function initPlayer(id, src) {
+            const video = document.getElementById(id);
+            if (!video) return;
+            
+            if (Hls.isSupported()) {
+                const hls = new Hls();
+                hls.loadSource(src);
+                hls.attachMedia(video);
+                hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                    video.play().catch(() => {});
+                });
+            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                video.src = src;
+                video.addEventListener('loadedmetadata', function() {
+                    video.play().catch(() => {});
+                });
+            }
+        }
+
+        function renderCameras() {
+            const grid = document.getElementById('video-grid');
+            grid.innerHTML = cameras.map(cam => `
+                <div class="bg-black rounded-2xl shadow-2xl overflow-hidden relative group">
+                    <div class="absolute top-3 left-3 z-10 flex gap-2">
+                        <span class="bg-red-600/90 text-white px-3 py-1 rounded-full text-xs font-bold">
+                            <i class="fa-solid fa-circle text-red-300 animate-pulse mr-1"></i> LIVE
+                        </span>
+                        <span class="bg-slate-800/90 text-white px-3 py-1 rounded-full text-xs font-semibold">
+                            ${cam.name}
+                        </span>
+                    </div>
+                    <button onclick="deleteCamera('${cam.id}')" class="absolute top-3 right-3 z-10 bg-red-600 hover:bg-red-700 text-white w-8 h-8 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                    <div class="aspect-video">
+                        <video id="${cam.id}" class="video-player" autoplay muted playsinline controls></video>
+                    </div>
+                </div>
+            `).join('');
+
+            // Initialize all players after rendering
+            cameras.forEach(cam => initPlayer(cam.id, cam.url));
+        }
+
+        function toggleAddForm() {
+            const form = document.getElementById('add-camera-form');
+            form.classList.toggle('hidden');
+        }
+
+        function saveNewCamera() {
+            const name = document.getElementById('new-camera-name').value.trim();
+            const url = document.getElementById('new-camera-url').value.trim();
+            
+            if (!name || !url) {
+                alert('กรุณากรอกชื่อกล้องและลิงก์ URL');
+                return;
+            }
+            
+            const newCam = {
+                id: 'v' + Date.now(),
+                name: name,
+                url: url
+            };
+            
+            cameras.push(newCam);
+            saveCameras();
+            renderCameras();
+            document.getElementById('new-camera-name').value = '';
+            document.getElementById('new-camera-url').value = '';
+            toggleAddForm();
+        }
+
+        function deleteCamera(id) {
+            if (confirm('คุณต้องการลบกล้องนี้ใช่หรือไม่?')) {
+                cameras = cameras.filter(c => c.id !== id);
+                saveCameras();
+                renderCameras();
+            }
+        }
+
+        // Initialize on page load
+        window.onload = () => {
+            renderCameras();
+        };
+    </script>
+</body>
+</html>
