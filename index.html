@@ -534,10 +534,18 @@
                                 <label class="block text-xs text-gray-400 mb-1.5 font-semibold">จำนวนเงินที่ต้องชำระ (บาท)</label>
                                 <input type="number" id="add-sys-price" value="1" min="1" class="w-full px-4 py-2.5 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                             </div>
-                            <div>
-                                <label class="block text-xs text-gray-400 mb-1.5 font-semibold">อัปโหลดรูปภาพประกอบ (สูงสุด 10 รูป)</label>
-                                <input type="file" id="add-sys-images" accept="image/*" multiple class="w-full px-4 py-2 bg-cardBg border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
-                                <p class="text-[9px] text-gray-500 mt-1">* รูปแรกจะใช้เป็นรูปหน้าปก</p>
+                            <div class="md:col-span-2">
+                                <label class="block text-xs text-gray-400 mb-1.5 font-semibold">ลิงก์รูปภาพประกอบ (สูงสุด 10 ลิงก์)</label>
+                                <div id="add-sys-images-container" class="space-y-2">
+                                    <div class="flex gap-2 items-center">
+                                        <input type="url" class="add-sys-image-url flex-1 px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="https://example.com/image.jpg">
+                                        <button type="button" onclick="removeImageUrlInput(this)" class="text-red-400 hover:text-red-300 px-2"><i class="fa-solid fa-minus-circle"></i></button>
+                                    </div>
+                                </div>
+                                <button type="button" onclick="addImageUrlInput('add-sys-images-container')" class="mt-2 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 text-xs font-bold rounded-xl transition-all flex items-center gap-2">
+                                    <i class="fa-solid fa-plus"></i> เพิ่มช่องวางลิงก์
+                                </button>
+                                <p class="text-[9px] text-gray-500 mt-2">* รองรับลิงก์ Google Drive (ใส่ลิงก์ปกติได้เลย ระบบจะแปลงให้เอง) * รูปแรกจะใช้เป็นรูปหน้าปก</p>
                             </div>
                             <div class="md:col-span-3">
                                 <label class="block text-xs text-gray-400 mb-1.5 font-semibold">คำอธิบายฟังก์ชันระบบสั้นๆ (Description)</label>
@@ -782,9 +790,17 @@
                     <input type="number" id="edit-sys-price" min="1" class="w-full px-4 py-2.5 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500">
                 </div>
                 <div class="md:col-span-2">
-                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold">อัปโหลดรูปภาพประกอบใหม่ (สูงสุด 10 รูป)</label>
-                    <input type="file" id="edit-sys-images" accept="image/*" multiple class="w-full px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500 file:mr-4 file:py-1 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-indigo-500/10 file:text-indigo-400 hover:file:bg-indigo-500/20">
-                    <p class="text-[10px] text-gray-500 mt-1">* เว้นว่างไว้หากไม่ต้องการเปลี่ยนรูปภาพเดิม</p>
+                    <label class="block text-xs text-gray-400 mb-1.5 font-semibold">ลิงก์รูปภาพประกอบใหม่ (สูงสุด 10 ลิงก์)</label>
+                    <div id="edit-sys-images-container" class="space-y-2">
+                        <div class="flex gap-2 items-center">
+                            <input type="url" class="edit-sys-image-url flex-1 px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="https://example.com/image.jpg">
+                            <button type="button" onclick="removeImageUrlInput(this)" class="text-red-400 hover:text-red-300 px-2"><i class="fa-solid fa-minus-circle"></i></button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addImageUrlInput('edit-sys-images-container')" class="mt-2 px-4 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 text-xs font-bold rounded-xl transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-plus"></i> เพิ่มช่องวางลิงก์
+                    </button>
+                    <p class="text-[10px] text-gray-500 mt-2">* รองรับลิงก์ Google Drive (ใส่ลิงก์ปกติได้เลย ระบบจะแปลงให้เอง) * เว้นว่างไว้หากไม่ต้องการเปลี่ยนรูปภาพเดิม</p>
                 </div>
                 <div>
                     <label class="block text-xs text-gray-400 mb-1.5 font-semibold">ลิงก์เดโมระบบใหม่ (Demo URL)</label>
@@ -1000,26 +1016,12 @@
         //  OBFUSCATED CONFIGURATION
         // ==========================================
         const _fbc = "eyJhcGlLZXkiOiJBSXphU3lEdUtRbmdVZDQ1OEI4QW00X0FqdzJHbldCaVRudjEybjgiLCJhdXRoRG9tYWluIjoiY291Z2FyMi03OTM1NC5maXJlYmFzZWFwcC5jb20iLCJkYXRhYmFzZVVSTCI6Imh0dHBzOi8vY291Z2FyMi03OTM1NC1kZWZhdWx0LXJ0ZGIuYXNpYS1zb3V0aGVhc3QxLmZpcmViYXNlZGF0YWJhc2UuYXBwIiwicHJvamVjdElkIjoiY291Z2FyMi03OTM1NCIsInN0b3JhZ2VCdWNrZXQiOiJjb3VnYXIyLTc5MzU0LmZpcmViYXNlc3RvcmFnZS5hcHAiLCJtZXNzYWdpbmdTZW5kZXJJZCI6IjgwNzA5OTY5NTM1NyIsImFwcElkIjoiMTo4MDcwOTk2OTUzNTc6d2ViOmI4NjUxNDU4MjY5ZmNjNTFjMDdlOTQiLCJtZWFzdXJlZW50SWQiOiJHLTUyOFBCQkZCRTQifQ==";
-        let firebaseConfig = JSON.parse(_d(_fbc));
+        const firebaseConfig = JSON.parse(_d(_fbc));
         
-        // Load Firebase config from localStorage if available
-        function loadFirebaseConfigFromLocalStorage() {
-            const saved = localStorage.getItem('cougar2_firebase_config');
-            if (saved) {
-                firebaseConfig = JSON.parse(saved);
-            }
+        // Initialize Firebase
+        if (!firebase.apps.length && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
+            firebase.initializeApp(firebaseConfig);
         }
-        
-        // Initialize Firebase (will be called after loading config)
-        function initializeFirebase() {
-            if (!firebase.apps.length && firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-                firebase.initializeApp(firebaseConfig);
-            }
-        }
-        
-        // Load config first and initialize
-        loadFirebaseConfigFromLocalStorage();
-        initializeFirebase();
 
         const telegramBotToken = _d("NzcxMzM1Mjg3NDpBQUVmRHlkYzNPSEstNVZTMG9SQ1V1MnBtdEt5VlpJSkNuRQ==");
         const telegramChatId = _d("LTUxMjQyNzc4MzU=");
@@ -1079,10 +1081,6 @@
                     systemsDatabase = Object.values(data)
                         .filter(sys => sys && sys.id)
                         .sort((a, b) => (b.id || "").localeCompare(a.id || ""));
-                    saveSystemsToLocalStorage(); // Save Firebase data to localStorage as backup
-                } else {
-                    // If no systems in Firebase, load from localStorage
-                    loadSystemsFromLocalStorage();
                 }
                 renderCatalog();
                 renderAdminSystemsTable();
@@ -1139,128 +1137,6 @@
                     updateMainPlayer(null);
                 }
             });
-        }
-
-        // ฟังก์ชันสำหรับบันทึกข้อมูลระบบลง localStorage
-        function saveSystemsToLocalStorage() {
-            localStorage.setItem('cougar2_systems', JSON.stringify(systemsDatabase));
-        }
-
-        // ฟังก์ชันสำหรับโหลดข้อมูลระบบจาก localStorage
-        function loadSystemsFromLocalStorage() {
-            const saved = localStorage.getItem('cougar2_systems');
-            if (saved) {
-                try {
-                    systemsDatabase = JSON.parse(saved);
-                } catch (e) {
-                    console.error('Error loading systems from localStorage:', e);
-                }
-            }
-        }
-
-        // Save Firebase config to localStorage
-        function saveFirebaseConfig() {
-            const apiKey = document.getElementById('fb-apiKey').value.trim();
-            const authDomain = document.getElementById('fb-authDomain').value.trim();
-            const databaseURL = document.getElementById('fb-databaseURL').value.trim();
-            const projectId = document.getElementById('fb-projectId').value.trim();
-            const storageBucket = document.getElementById('fb-storageBucket').value.trim();
-            const messagingSenderId = document.getElementById('fb-messagingSenderId').value.trim();
-            const appId = document.getElementById('fb-appId').value.trim();
-
-            if (!apiKey || !authDomain || !databaseURL || !projectId) {
-                alert('กรุณากรอกข้อมูลที่จำเป็น (apiKey, authDomain, databaseURL, projectId)');
-                return;
-            }
-
-            firebaseConfig = {
-                apiKey,
-                authDomain,
-                databaseURL,
-                projectId,
-                storageBucket,
-                messagingSenderId,
-                appId
-            };
-
-            localStorage.setItem('cougar2_firebase_config', JSON.stringify(firebaseConfig));
-
-            // Initialize Firebase
-            if (firebase.apps.length) {
-                firebase.app().delete().then(() => {
-                    firebase.initializeApp(firebaseConfig);
-                    updateFirebaseStatus(true);
-                    loadDataFromFirebase();
-                });
-            } else {
-                firebase.initializeApp(firebaseConfig);
-                updateFirebaseStatus(true);
-                loadDataFromFirebase();
-            }
-
-            alert('เชื่อมต่อ Firebase สำเร็จ!');
-        }
-
-        // Clear Firebase config and switch to In-Memory
-        function clearFirebaseConfig() {
-            if (confirm('ต้องการล้างการตั้งค่า Firebase และเปลี่ยนไปใช้ In-Memory Mode ใช่หรือไม่?')) {
-                localStorage.removeItem('cougar2_firebase_config');
-                firebaseConfig = {
-                    apiKey: "YOUR_API_KEY",
-                    authDomain: "",
-                    databaseURL: "",
-                    projectId: "",
-                    storageBucket: "",
-                    messagingSenderId: "",
-                    appId: ""
-                };
-
-                // Clear form
-                document.getElementById('fb-apiKey').value = "";
-                document.getElementById('fb-authDomain').value = "";
-                document.getElementById('fb-databaseURL').value = "";
-                document.getElementById('fb-projectId').value = "";
-                document.getElementById('fb-storageBucket').value = "";
-                document.getElementById('fb-messagingSenderId').value = "";
-                document.getElementById('fb-appId').value = "";
-
-                updateFirebaseStatus(false);
-                alert('เปลี่ยนไปใช้ In-Memory Mode เรียบร้อยแล้ว!');
-            }
-        }
-
-        // Update Firebase status indicator
-        function updateFirebaseStatus(connected) {
-            const statusEl = document.getElementById('firebase-status');
-            const indicatorEl = document.getElementById('firebase-status-indicator');
-
-            if (statusEl && indicatorEl) {
-                if (connected) {
-                    statusEl.innerText = 'Firebase Connected (บันทึกข้อมูลถาวร)';
-                    statusEl.className = 'text-xs text-emerald-400 uppercase tracking-widest';
-                    indicatorEl.className = 'ml-auto w-4 h-4 rounded-full bg-emerald-500';
-                } else {
-                    statusEl.innerText = 'In-Memory Mode (ไม่บันทึกข้อมูลเมื่อ Refresh)';
-                    statusEl.className = 'text-xs text-yellow-400 uppercase tracking-widest';
-                    indicatorEl.className = 'ml-auto w-4 h-4 rounded-full bg-yellow-500 animate-pulse';
-                }
-            }
-        }
-
-        // Populate Firebase config form
-        function populateFirebaseConfigForm() {
-            if (firebaseConfig.apiKey && firebaseConfig.apiKey !== "YOUR_API_KEY") {
-                document.getElementById('fb-apiKey').value = firebaseConfig.apiKey || "";
-                document.getElementById('fb-authDomain').value = firebaseConfig.authDomain || "";
-                document.getElementById('fb-databaseURL').value = firebaseConfig.databaseURL || "";
-                document.getElementById('fb-projectId').value = firebaseConfig.projectId || "";
-                document.getElementById('fb-storageBucket').value = firebaseConfig.storageBucket || "";
-                document.getElementById('fb-messagingSenderId').value = firebaseConfig.messagingSenderId || "";
-                document.getElementById('fb-appId').value = firebaseConfig.appId || "";
-                updateFirebaseStatus(true);
-            } else {
-                updateFirebaseStatus(false);
-            }
         }
 
         function transformVideoLink(url) {
@@ -1385,11 +1261,6 @@
         // เรียกโหลดข้อมูลทันที
         if (firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.apiKey !== "") {
             loadDataFromFirebase();
-        } else {
-            // If no Firebase, load from localStorage
-            loadSystemsFromLocalStorage();
-            renderCatalog();
-            renderAdminSystemsTable();
         }
 
         // เฝ้าติดตามสถานะการ Login
@@ -1614,7 +1485,11 @@
             }
 
             if (firebaseConfig.apiKey === "YOUR_API_KEY" || firebaseConfig.apiKey === "") {
+                loadSystemsFromLocalStorage();
                 renderCatalog();
+            } else {
+                // Even with Firebase, load localStorage as a backup initially
+                loadSystemsFromLocalStorage();
             }
         };
 
@@ -1702,8 +1577,27 @@
                 }
 
                 if (sys.demoUrl) {
-                    // ถ้าเป็นลิงก์ ให้ตรวจสอบว่าเป็น Google Drive หรือไม่
-                    const finalUrl = transformVideoLink(sys.demoUrl).src; // ใช้ฟังก์ชันที่มีอยู่แล้วแปลงลิงก์ Drive/YouTube
+                    // ถ้าเป็นลิงก์ ให้ตรวจสอบว่าเป็น YouTube Video หรือ Google Drive
+                    const urlLower = sys.demoUrl.toLowerCase();
+                    let finalUrl = sys.demoUrl;
+                    
+                    // ตรวจสอบว่าเป็น YouTube Video เท่านั้นที่จะใช้ transformVideoLink
+                    const isYouTubeVideo = urlLower.includes('youtube.com') || 
+                                          urlLower.includes('youtu.be');
+                    
+                    // ตรวจสอบว่าเป็น Google Drive
+                    const isGoogleDrive = urlLower.includes('drive.google.com');
+                    
+                    if (isYouTubeVideo) {
+                        // ถ้าเป็น YouTube Video ให้ใช้ transformVideoLink
+                        finalUrl = transformVideoLink(sys.demoUrl).src;
+                    } else if (isGoogleDrive) {
+                        // ถ้าเป็น Google Drive แสดงข้อความแนะนำ
+                        alert('⚠️ Google Drive ไม่อนุญาตให้ฝังไฟล์ HTML ใน iframe ได้โดยตรง\n\nวิธีแก้ไข:\n1. ใช้ GitHub Pages, Vercel, หรือ Netlify เพื่อโฮสต์ไฟล์ HTML ของคุณ\n2. หรือเปิดลิงก์ในแท็บใหม่ด้วยตัวเอง\n\nลิงก์จะถูกเปิดในแท็บใหม่');
+                        window.open(sys.demoUrl, '_blank');
+                        return;
+                    }
+                    
                     iframe.removeAttribute('srcdoc');
                     iframe.src = finalUrl;
                 } else {
@@ -1968,9 +1862,6 @@
             if (tab === 'media') {
                 renderAdminDocsTable();
                 renderAdminVideosTable();
-            }
-            if (tab === 'settings') {
-                populateFirebaseConfigForm();
             }
         }
 
@@ -2324,6 +2215,7 @@
         }
 
         function deleteSystem(id) {
+            const sys = systemsDatabase.find(s => s.id === id);
             if (confirm('ยืนยันที่จะลบระบบนี้ออกจากคลังใช่หรือไม่?')) {
                 systemsDatabase = systemsDatabase.filter(s => s.id !== id);
                 
@@ -2333,6 +2225,8 @@
                     currentPage = totalPages;
                 }
                 
+                saveSystemsToLocalStorage(); // Save to localStorage immediately!
+                
                 renderAdminSystemsTable();
                 renderCatalog();
                 
@@ -2340,6 +2234,8 @@
                 if (firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.apiKey !== "") {
                     firebase.database().ref('systems/' + id).remove();
                 }
+                
+                showSuccessNotification('ลบระบบสำเร็จ!', sys ? 'ระบบ "' + sys.title + '" ถูกลบออกจากแคตตาล็อกแล้ว' : 'ระบบถูกลบออกจากแคตตาล็อกแล้ว');
             }
         }
 
@@ -2351,7 +2247,44 @@
                 document.getElementById('edit-sys-tier').value = sys.tier;
                 document.getElementById('edit-sys-price').value = sys.price || 1;
                 document.getElementById('edit-sys-downloads').value = sys.downloads || 0;
-                document.getElementById('edit-sys-images').value = ""; // Clear multi image input
+                
+                // Populate image URLs container
+                const editImagesContainer = document.getElementById('edit-sys-images-container');
+                editImagesContainer.innerHTML = '';
+                const existingImages = sys.images || [];
+                
+                if (existingImages.length === 0) {
+                    // Add one empty input
+                    const newRow = document.createElement('div');
+                    newRow.className = 'flex gap-2 items-center';
+                    newRow.innerHTML = `
+                        <input type="url" class="edit-sys-image-url flex-1 px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="https://example.com/image.jpg">
+                        <button type="button" onclick="removeImageUrlInput(this)" class="text-red-400 hover:text-red-300 px-2"><i class="fa-solid fa-minus-circle"></i></button>
+                    `;
+                    editImagesContainer.appendChild(newRow);
+                } else {
+                    existingImages.forEach((url, index) => {
+                        const newRow = document.createElement('div');
+                        newRow.className = 'flex gap-2 items-center';
+                        newRow.innerHTML = `
+                            <input type="url" class="edit-sys-image-url flex-1 px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" value="${url}" placeholder="https://example.com/image.jpg">
+                            <button type="button" onclick="removeImageUrlInput(this)" class="text-red-400 hover:text-red-300 px-2"><i class="fa-solid fa-minus-circle"></i></button>
+                        `;
+                        editImagesContainer.appendChild(newRow);
+                    });
+                    
+                    // Add empty inputs until we have at least one, up to 10
+                    while (editImagesContainer.children.length < 1) {
+                        const newRow = document.createElement('div');
+                        newRow.className = 'flex gap-2 items-center';
+                        newRow.innerHTML = `
+                            <input type="url" class="edit-sys-image-url flex-1 px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="https://example.com/image.jpg">
+                            <button type="button" onclick="removeImageUrlInput(this)" class="text-red-400 hover:text-red-300 px-2"><i class="fa-solid fa-minus-circle"></i></button>
+                        `;
+                        editImagesContainer.appendChild(newRow);
+                    }
+                }
+                
                 document.getElementById('edit-sys-demo-url').value = sys.demoUrl || ""; // Populate Demo URL
                 if (document.getElementById('edit-sys-demo-file')) document.getElementById('edit-sys-demo-file').value = ""; // Clear file input
                 
@@ -2383,37 +2316,26 @@
             }
         }
 
-        async function updateSystemData() {
+        function updateSystemData() {
             var id = document.getElementById('edit-sys-id').value;
             
-            // 1. อ่านข้อมูลไฟล์ใหม่ก่อน (ถ้ามี)
-            var fileInput = document.getElementById('edit-sys-images');
             var demoUrl = document.getElementById('edit-sys-demo-url').value.trim();
             var demoFileInput = document.getElementById('edit-sys-demo-file');
             
-            var newImageUrls = null;
-
-            if (fileInput.files && fileInput.files.length > 0) {
-                newImageUrls = [];
-                const count = Math.min(fileInput.files.length, 10);
-                for (let i = 0; i < count; i++) {
-                    newImageUrls.push(await readFileAsDataURL(fileInput.files[i]));
-                }
-            }
-
             var newDemoHtml = null;
             if (demoFileInput && demoFileInput.files && demoFileInput.files[0]) {
-                newDemoHtml = await readFileAsText(demoFileInput.files[0]);
+                newDemoHtml = readFileAsText(demoFileInput.files[0]);
             }
             
-            // 2. ค้นหาข้อมูลระบบใน database อีกครั้งหลังจาก await เพื่อป้องกัน race condition
+            // ค้นหาข้อมูลระบบใน database
             var sysIndex = systemsDatabase.findIndex(s => s.id === id);
             
             if (sysIndex !== -1) {
-                // อัปเดตรูปภาพ (ถ้ามีการเลือกใหม่)
-                if (newImageUrls) {
-                    systemsDatabase[sysIndex].image = newImageUrls[0];
-                    systemsDatabase[sysIndex].images = newImageUrls;
+                // อัปเดตรูปภาพจาก URL inputs
+                var imageUrls = getImageUrlsFromContainer('edit-sys-images-container', 'edit-sys-image-url');
+                if (imageUrls.length > 0) {
+                    systemsDatabase[sysIndex].image = imageUrls[0];
+                    systemsDatabase[sysIndex].images = imageUrls;
                 }
                 
                 // อัปเดตเดโม
@@ -2438,7 +2360,9 @@
                     firebase.database().ref('systems/' + id).set(systemsDatabase[sysIndex]);
                 }
                 
-                alert('อัปเดตข้อมูลระบบ "' + systemsDatabase[sysIndex].title + '" เรียบร้อยแล้ว!');
+                saveSystemsToLocalStorage(); // Save to localStorage immediately!
+                
+                showSuccessNotification('อัปเดตระบบสำเร็จ!', 'ระบบ "' + systemsDatabase[sysIndex].title + '" ถูกอัปเดตแล้ว');
                 closeModal('edit-system-modal');
                 renderAdminSystemsTable();
                 renderCatalog();
@@ -2778,13 +2702,9 @@
                 return;
             }
 
-            var imageUrls = [];
-            if (fileInput.files && fileInput.files.length > 0) {
-                const count = Math.min(fileInput.files.length, 10);
-                for (let i = 0; i < count; i++) {
-                    imageUrls.push(await readFileAsDataURL(fileInput.files[i]));
-                }
-            } else {
+            var imageUrls = getImageUrlsFromContainer('add-sys-images-container', 'add-sys-image-url');
+            
+            if (imageUrls.length === 0) {
                 imageUrls.push("https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&q=80");
             }
 
@@ -2812,7 +2732,9 @@
 
             systemsDatabase.unshift(newSys);
             currentPage = 1; // กลับไปหน้าแรกเพื่อดูระบบที่เพิ่มใหม่
+            saveSystemsToLocalStorage(); // Save to localStorage immediately!
             renderCatalog();
+            renderAdminSystemsTable(); // Also render admin table
             
             // บันทึกเฉพาะระบบใหม่ลง Firebase (มีประสิทธิภาพกว่า)
             if (firebaseConfig.apiKey !== "YOUR_API_KEY" && firebaseConfig.apiKey !== "") {
@@ -2824,14 +2746,25 @@
             document.getElementById('add-sys-tier').value = "FREE";
             document.getElementById('add-sys-price').value = "1";
             document.getElementById('add-sys-downloads').value = "0";
-            document.getElementById('add-sys-images').value = "";
+            
+            // Clear image inputs container
+            const addImagesContainer = document.getElementById('add-sys-images-container');
+            addImagesContainer.innerHTML = '';
+            const newRow = document.createElement('div');
+            newRow.className = 'flex gap-2 items-center';
+            newRow.innerHTML = `
+                <input type="url" class="add-sys-image-url flex-1 px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="https://example.com/image.jpg">
+                <button type="button" onclick="removeImageUrlInput(this)" class="text-red-400 hover:text-red-300 px-2"><i class="fa-solid fa-minus-circle"></i></button>
+            `;
+            addImagesContainer.appendChild(newRow);
+            
             document.getElementById('add-sys-demo-url').value = "";
             if (document.getElementById('add-sys-demo-file')) document.getElementById('add-sys-demo-file').value = "";
             document.getElementById('add-sys-desc').value = "";
             document.getElementById('add-sys-source').value = "";
             togglePriceInput('add');
 
-            alert('เพิ่มระบบ "' + title + '" เข้าสู่แคตตาล็อกหน้าร้านสำเร็จแล้ว!');
+            showSuccessNotification('เพิ่มระบบสำเร็จ!', 'ระบบ "' + title + '" ถูกเพิ่มเข้าสู่แคตตาล็อกแล้ว');
             switchAdminTab('manage');
         }
 
@@ -2842,6 +2775,105 @@
                 reader.onerror = reject;
                 reader.readAsText(file);
             });
+        }
+        
+        function convertGoogleDriveUrl(url) {
+            if (!url) return url;
+            
+            // Match Google Drive file IDs from various URL formats
+            const patterns = [
+                /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/,
+                /drive\.google\.com\/uc\?.*id=([a-zA-Z0-9_-]+)/,
+                /drive\.google\.com\/open\?.*id=([a-zA-Z0-9_-]+)/,
+                /drive\.google\.com\/drive\/u\/\d+\/folders\/([a-zA-Z0-9_-]+)/,
+                /drive\.google\.com\/drive\/folders\/([a-zA-Z0-9_-]+)/,
+                /photos\.google\.com\/.*\/([a-zA-Z0-9_-]+)/,
+                /googleusercontent\.com\/.*\/([a-zA-Z0-9_-]+)/
+            ];
+            
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    const fileId = match[1];
+                    // Try multiple formats in case one doesn't work
+                    // First try the direct thumbnail format
+                    return `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
+                }
+            }
+            
+            return url;
+        }
+        
+        function addImageUrlInput(containerId) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            
+            const currentCount = container.children.length;
+            if (currentCount >= 10) {
+                alert('⚠️ สามารถเพิ่มลิงก์รูปภาพได้สูงสุด 10 ลิงก์เท่านั้น');
+                return;
+            }
+            
+            const newRow = document.createElement('div');
+            newRow.className = 'flex gap-2 items-center';
+            const inputClass = containerId.includes('edit') ? 'edit-sys-image-url' : 'add-sys-image-url';
+            newRow.innerHTML = `
+                <input type="url" class="${inputClass} flex-1 px-4 py-2 bg-gray-950 border border-white/10 rounded-xl text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="https://example.com/image.jpg">
+                <button type="button" onclick="removeImageUrlInput(this)" class="text-red-400 hover:text-red-300 px-2"><i class="fa-solid fa-minus-circle"></i></button>
+            `;
+            container.appendChild(newRow);
+        }
+        
+        function removeImageUrlInput(button) {
+            const row = button.parentElement;
+            const container = row.parentElement;
+            if (container.children.length > 1) {
+                row.remove();
+            } else {
+                // Can't remove the last one - just clear it
+                const input = row.querySelector('input');
+                if (input) input.value = '';
+            }
+        }
+        
+        function getImageUrlsFromContainer(containerId, inputClass) {
+            const container = document.getElementById(containerId);
+            if (!container) return [];
+            
+            const urls = [];
+            const inputs = container.querySelectorAll(`.${inputClass}`);
+            inputs.forEach(input => {
+                const value = input.value.trim();
+                if (value) {
+                    try {
+                        new URL(value);
+                        urls.push(convertGoogleDriveUrl(value));
+                    } catch (e) {
+                        // Skip invalid URLs
+                    }
+                }
+            });
+            
+            return urls.slice(0, 10);
+        }
+
+        function saveSystemsToLocalStorage() {
+            try {
+                localStorage.setItem('cougar2_systems', JSON.stringify(systemsDatabase));
+            } catch (e) {
+                console.error('Failed to save to localStorage:', e);
+            }
+        }
+
+        function loadSystemsFromLocalStorage() {
+            try {
+                const saved = localStorage.getItem('cougar2_systems');
+                if (saved) {
+                    systemsDatabase = JSON.parse(saved);
+                }
+            } catch (e) {
+                console.error('Failed to load from localStorage:', e);
+            }
         }
 
         function changeSpeed(audioId, speed) {
